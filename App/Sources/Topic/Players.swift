@@ -102,7 +102,7 @@ struct SimPlayer: View {
     }
 
     private var simulation: Simulation { custom ?? base }
-    private var controls: [SimControl] { Simulations.controls(for: base.id) }
+    private var tryControls: [SimControl] { Simulations.controls(for: base.id) }
     private var last: Int { max(0, simulation.frames.count - 1) }
 
     var body: some View {
@@ -120,8 +120,8 @@ struct SimPlayer: View {
             }
             scrubber
             controls
-            if !controls.isEmpty {
-                TryItPanel(controls: controls, values: values, hue: hue, onChange: apply, onReset: reset)
+            if !tryControls.isEmpty {
+                TryItPanel(controls: tryControls, values: values, hue: hue, onChange: apply, onReset: reset)
                     .id("tryit")
             }
         }

@@ -8,12 +8,15 @@ Understanding first, spectacle second.
 
 - **Map**: 52 ideas across six areas (maths, how computers work, data, algorithms, networks, machine learning). Drag to turn it, pinch to zoom, and tap an idea to see what it needs and what it unlocks. The **Tower** layout stacks foundations at the bottom and advanced ideas at the top.
 - **Read / Build / Play**: each idea has three depths of explanation, a diagram that builds one step at a time, and, where it helps, a simulation of the real algorithm that you can scrub through.
+- **Try it**: most simulations have controls. Change the learning rate, the number to search for, the start node, a road's cost or the insert order, and the algorithm runs again with your choice.
+- **What's next**: the map suggests one idea to pick up or start, the You tab lists ideas whose groundwork you've already done, and "I get it" offers the next idea it unlocked.
 - **Before this**: the full chain of prerequisites in order, so nothing is assumed.
 - **Where this leads**: why an idea matters, shown as a path to the bigger ideas it makes possible.
 - **Compare**: two ideas side by side, one aspect per row.
 - **Ask**: "Explain like I'm 12", analogies, steps and examples. On iOS 26 with Apple Intelligence, answers come from Apple's on-device model. Everywhere else they come from Orbit's reviewed notes. Every answer says which source it used.
 - **Journeys**: guided routes through the map.
 - **Review**: ideas you mark "I get it" come back on a spaced schedule, as questions about how they connect.
+- **Text size**: all text follows the iPhone's text-size setting.
 - **Aphantasia mode**: opens each idea on the visual build and keeps every caption so far on screen. The tutor never asks you to imagine anything.
 
 All content is written by hand and linked to sources. Nothing leaves the device.
@@ -31,7 +34,7 @@ project.yml           XcodeGen spec
 
 There is no Xcode project in the repo; XcodeGen generates it.
 
-- **CI**: every push to `main` runs the OrbitKit tests on Linux and macOS, then the app tests on a simulator, and uploads `Orbit-unsigned.ipa` as a workflow artifact. Pushing a `v*` tag also attaches the IPA to a GitHub Release.
+- **CI**: every push to `main` runs the OrbitKit tests on Linux and macOS, then the app tests on a simulator, and uploads `Orbit-unsigned.ipa` as a workflow artifact. It also screenshots every main screen in light mode, dark mode and large text (`Orbit-screenshots-N`), using debug-only launch arguments such as `-orbitSeed YES -orbitScreen topic:dijkstra -orbitMode play`. Pushing a `v*` tag also attaches the IPA to a GitHub Release.
 - **Locally on a Mac**: `brew install xcodegen && xcodegen generate && open Orbit.xcodeproj`.
 - **OrbitKit without a Mac**: `swift test --package-path Packages/OrbitKit` (works in the `swift:6.1` Docker image).
 
