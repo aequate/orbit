@@ -138,24 +138,26 @@ struct MapScreen: View {
     // MARK: Canvas
 
     /// The part of the canvas not hidden behind the bottom card. The map centres itself there.
-    private func viewport(_ size: CGSize) -> CGSize {
+    private static func viewport(_ size: CGSize, cover: CGFloat) -> CGSize {
         CGSize(width: size.width, height: max(200, size.height - cover - 20))
     }
 
     private var mapCanvas: some View {
         let scene = self.scene
         let style = self.style
+        // Read here, in body, so a new card height redraws the map.
+        let cover = self.cover
         return GeometryReader { geo in
             TimelineView(.animation(minimumInterval: nil, paused: !rig.isMoving)) { timeline in
                 Canvas { context, size in
                     rig.step(to: timeline.date)
-                    MapRenderer.draw(context, size: viewport(size), scene: scene, camera: rig.camera, morph: rig.morph, style: style)
+                    MapRenderer.draw(context, size: Self.viewport(size, cover: cover), scene: scene, camera: rig.camera, morph: rig.morph, style: style)
                 }
             }
             .contentShape(Rectangle())
             .gesture(
                 SpatialTapGesture().onEnded { value in
-                    tap(at: value.location, size: viewport(geo.size))
+                    tap(at: value.location, size: Self.viewport(geo.size, cover: cover))
                 }
             )
             .simultaneousGesture(

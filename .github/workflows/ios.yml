@@ -92,9 +92,12 @@ jobs:
           shoot() {
             name=$1; shift
             xcrun simctl terminate "$SIM_UDID" "$BUNDLE" >/dev/null 2>&1 || true
-            xcrun simctl launch "$SIM_UDID" "$BUNDLE" "$@" >/dev/null
-            sleep 5
+            xcrun simctl launch "$SIM_UDID" "$BUNDLE" "$@" >/dev/null || echo "launch failed: $name"
+            sleep 7
             xcrun simctl io "$SIM_UDID" screenshot "shots/$name.png" >/dev/null 2>&1 && echo "shot $name"
+            if ! xcrun simctl spawn "$SIM_UDID" launchctl list 2>/dev/null | grep -q "$BUNDLE"; then
+              echo "::warning::Orbit was not running after $name"
+            fi
           }
           for look in light dark; do
             xcrun simctl ui "$SIM_UDID" appearance "$look"
@@ -117,13 +120,20 @@ jobs:
           shoot "light-14-bigtext-you" -orbitSeed YES -orbitScreen you
           xcrun simctl ui "$SIM_UDID" content_size large
           ls -1 shots | wc -l
+          for report in $(find "$HOME/Library/Logs/DiagnosticReports" -name "Orbit*" 2>/dev/null); do
+            echo "Crash report: $report"
+            head -n 80 "$report"
+            cp "$report" shots/ 2>/dev/null || true
+          done
 
       - name: Upload screenshots
         if: always()
         uses: actions/upload-artifact@v6
         with:
           name: Orbit-screenshots-${{ github.run_number }}
-          path: shots/*.png
+          path: |
+            shots/*.png
+            shots/*.ips
           if-no-files-found: ignore
 
       - name: Archive (unsigned)

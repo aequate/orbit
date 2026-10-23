@@ -70,7 +70,7 @@ public struct Camera: Hashable, Sendable {
     public func project(_ p: Vec3, width: Double, height: Double) -> Projected {
         let r = rotate(p)
         let s = distance / max(0.2, distance - r.z)
-        let unit = min(width, height) * 0.4 * zoom
+        let unit = min(width, height) * 0.46 * zoom
         return Projected(
             x: width / 2 + r.x * s * unit,
             y: height / 2 - r.y * s * unit,
