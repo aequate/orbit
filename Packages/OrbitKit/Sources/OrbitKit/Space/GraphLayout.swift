@@ -29,10 +29,10 @@ public enum GraphLayout {
 
     /// Height of a tower ring for a given prerequisite depth.
     public static func towerHeight(depth: Int, maxDepth: Int) -> Double {
-        maxDepth == 0 ? 0 : -0.9 + 1.8 * Double(depth) / Double(maxDepth)
+        maxDepth == 0 ? 0 : -0.78 + 1.56 * Double(depth) / Double(maxDepth)
     }
 
-    public static let towerRadius = 0.95
+    public static let towerRadius = 0.78
 
     // MARK: Orbit (force-directed, clustered)
 

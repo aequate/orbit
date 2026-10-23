@@ -53,8 +53,8 @@ final class EngineTests: XCTestCase {
     func testTowerHeightFollowsDepth() {
         let positions = GraphLayout.positions(for: atlas, layout: .tower)
         XCTAssertLessThan(positions["binary"]!.y, positions["llm"]!.y)
-        XCTAssertEqual(GraphLayout.towerHeight(depth: 0, maxDepth: 10), -0.9, accuracy: 1e-9)
-        XCTAssertEqual(GraphLayout.towerHeight(depth: 10, maxDepth: 10), 0.9, accuracy: 1e-9)
+        XCTAssertEqual(GraphLayout.towerHeight(depth: 0, maxDepth: 10), -0.78, accuracy: 1e-9)
+        XCTAssertEqual(GraphLayout.towerHeight(depth: 10, maxDepth: 10), 0.78, accuracy: 1e-9)
     }
 
     func testFacingBringsPointToFront() {
