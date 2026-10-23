@@ -244,8 +244,7 @@ private struct TunnelSection: View {
                     .foregroundStyle(Theme.inkSoft)
                     .surface()
             } else {
-                Text("Everything this builds on, in order. Read top to bottom and nothing is assumed. "
-                     + String(done) + " of " + String(tunnel.count) + " understood.")
+                Text(Words.join(["Everything this builds on, in order. Read top to bottom and nothing is assumed. ", String(done), " of ", String(tunnel.count), " understood."]))
                     .font(Theme.caption)
                     .foregroundStyle(Theme.inkSoft)
                     .fixedSize(horizontal: false, vertical: true)

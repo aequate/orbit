@@ -136,7 +136,7 @@ struct YouScreen: View {
         VStack(alignment: .leading, spacing: 10) {
             SectionLabel("About the content")
             VStack(alignment: .leading, spacing: 10) {
-                Text(String(model.atlas.topics.count) + " ideas across " + String(model.atlas.clusters.count) + " areas, written by hand and linked to their sources.")
+                Text(Words.join([String(model.atlas.topics.count), " ideas across ", String(model.atlas.clusters.count), " areas, written by hand and linked to their sources."]))
                     .font(Theme.body)
                     .foregroundStyle(Theme.ink)
                     .fixedSize(horizontal: false, vertical: true)

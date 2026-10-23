@@ -57,6 +57,13 @@ enum Theme {
     static let label = Font.system(size: 12, weight: .semibold)
 }
 
+/// Joins text pieces. Long `+` chains of strings can time out Swift's type checker.
+enum Words {
+    static func join(_ parts: [String]) -> String {
+        parts.joined()
+    }
+}
+
 extension Atlas {
     func hue(of topicID: String) -> Color {
         Theme.hue(cluster(of: topicID)?.hue ?? "")

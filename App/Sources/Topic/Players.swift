@@ -16,7 +16,7 @@ struct DiagramPlayer: View {
             DiagramCanvas(diagram: diagram, step: step, hue: hue)
                 .surface(padding: 8)
             HStack {
-                Text("Step " + String(step + 1) + " of " + String(diagram.steps.count))
+                Text(Words.join(["Step ", String(step + 1), " of ", String(diagram.steps.count)]))
                     .font(Theme.label)
                     .foregroundStyle(Theme.inkSoft)
                 Spacer()

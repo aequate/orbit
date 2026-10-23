@@ -47,7 +47,7 @@ struct AskPanel: View {
                     .disabled(loading || question.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     .accessibilityLabel("Ask")
                 }
-            } else if case .unavailable(let reason) = status {
+            } else if let reason = unavailableReason {
                 Text(reason)
                     .font(Theme.caption)
                     .foregroundStyle(Theme.inkSoft)
@@ -65,6 +65,11 @@ struct AskPanel: View {
                 answerCard(answer)
             }
         }
+    }
+
+    private var unavailableReason: String? {
+        if case .unavailable(let reason) = status { return reason }
+        return nil
     }
 
     private func answerCard(_ text: String) -> some View {

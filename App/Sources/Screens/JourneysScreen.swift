@@ -56,7 +56,7 @@ private struct JourneyCard: View {
                         .font(Theme.caption)
                         .foregroundStyle(Theme.inkSoft)
                     Spacer()
-                    Text(progress.isComplete ? "Review" : (progress.isStarted ? "Continue" : "Start"))
+                    Text(JourneyText.action(progress))
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(hue)
                 }
@@ -68,6 +68,11 @@ private struct JourneyCard: View {
 }
 
 enum JourneyText {
+    static func action(_ progress: Journey.Progress) -> String {
+        if progress.isComplete { return "Review" }
+        return progress.isStarted ? "Continue" : "Start"
+    }
+
     static func status(_ progress: Journey.Progress) -> String {
         if progress.isComplete { return "All " + String(progress.total) + " steps understood" }
         return String(progress.done) + " of " + String(progress.total) + " steps understood"
@@ -214,7 +219,7 @@ private struct JourneyStepRow: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Step " + String(number) + ": " + topic.title)
+        .accessibilityLabel(Words.join(["Step ", String(number), ": ", topic.title]))
         .accessibilityValue(understood ? "Understood" : (isNext ? "Next" : "Not yet"))
     }
 }

@@ -48,7 +48,7 @@ struct CompareScreen: View {
                             .fixedSize(horizontal: false, vertical: true)
                         }
                         .accessibilityElement(children: .ignore)
-                        .accessibilityLabel(row.aspect + ". " + comparison.left.name + ": " + row.left + ". " + comparison.right.name + ": " + row.right)
+                        .accessibilityLabel(Words.join([row.aspect, ". ", comparison.left.name, ": ", row.left, ". ", comparison.right.name, ": ", row.right]))
                     }
                 }
 

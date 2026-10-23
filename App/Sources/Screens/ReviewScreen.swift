@@ -23,7 +23,7 @@ struct ReviewScreen: View {
     private var overview: some View {
         let now = Date()
         let due = model.state.due(now: now)
-        let upcoming = model.state.upcoming(now: now, limit: 6)
+        let upcoming = model.state.upcoming(now: now, limit: 6).map { UpcomingItem(id: $0.id, due: $0.due) }
         return ScrollView {
             VStack(alignment: .leading, spacing: 18) {
                 Text("Review")
@@ -60,7 +60,7 @@ struct ReviewScreen: View {
                     VStack(alignment: .leading, spacing: 10) {
                         SectionLabel("Coming up")
                         VStack(spacing: 0) {
-                            ForEach(upcoming, id: \.id) { item in
+                            ForEach(upcoming) { item in
                                 HStack {
                                     Circle().fill(model.atlas.hue(of: item.id)).frame(width: 8, height: 8)
                                     Text(model.atlas.topic(item.id)?.title ?? item.id)
@@ -108,6 +108,11 @@ struct ReviewScreen: View {
         let questions = QuizMaker(atlas: model.atlas).session(for: Array(due.prefix(10)), seed: seed)
         session = questions.isEmpty ? nil : questions
     }
+}
+
+private struct UpcomingItem: Identifiable {
+    let id: String
+    let due: Date
 }
 
 enum ReviewText {
@@ -225,7 +230,7 @@ private struct ReviewSession: View {
             Text("Done")
                 .font(Theme.title(28))
                 .foregroundStyle(Theme.ink)
-            Text("You got " + String(correct) + " of " + String(questions.count) + ". Ideas you missed will come back in about ten minutes; the rest are scheduled further out.")
+            Text(Words.join(["You got ", String(correct), " of ", String(questions.count), ". Ideas you missed will come back in about ten minutes; the rest are scheduled further out."]))
                 .font(Theme.body)
                 .foregroundStyle(Theme.inkSoft)
                 .fixedSize(horizontal: false, vertical: true)
