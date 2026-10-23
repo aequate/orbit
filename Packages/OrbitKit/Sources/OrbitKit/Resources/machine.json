@@ -1,0 +1,456 @@
+{
+  "cluster": {
+    "id": "machine",
+    "name": "How computers work",
+    "blurb": "From a single switch to a running program: the layers inside every computer.",
+    "hue": "blue"
+  },
+  "topics": [
+    {
+      "id": "binary",
+      "title": "Binary",
+      "cluster": "machine",
+      "aliases": ["bits", "base 2", "bit", "byte"],
+      "summary": "Writing every number with just two digits, 0 and 1.",
+      "levels": {
+        "intro": "Computers count with only two digits, 0 and 1, because a switch has only two states: off and on. Each digit is called a bit.",
+        "core": "In our usual base 10, each place is worth ten times the one to its right: ones, tens, hundreds. In binary each place is worth twice as much: 1, 2, 4, 8, 16 and so on. So 1011 means 8 + 0 + 2 + 1 = 11. Eight bits make a byte, which can hold 256 different values (0 to 255). Counting up in binary works like an odometer: when a place goes past 1, it resets to 0 and carries 1 to the left.",
+        "deep": "Everything a computer stores is ultimately a pattern of bits, and meaning comes from the agreed encoding. The same byte 01000001 is the number 65, or the letter A in ASCII, or part of a pixel's colour. Negative numbers usually use two's complement, so that ordinary addition circuits also handle subtraction. Fractions use floating point, which is why 0.1 + 0.2 isn't exactly 0.3 on most computers: 0.1 has no exact binary form, just as 1/3 has no exact decimal form."
+      },
+      "analogy": "A row of light switches where each switch is worth double the one to its right.",
+      "realWorld": ["Every file, photo and message is stored as bits", "Internet speeds are measured in bits per second", "Colours on screens are often 3 bytes: red, green, blue"],
+      "sources": [
+        {"title": "Binary number — Wikipedia", "url": "https://en.wikipedia.org/wiki/Binary_number"},
+        {"title": "Two's complement — Wikipedia", "url": "https://en.wikipedia.org/wiki/Two%27s_complement"}
+      ],
+      "simulations": ["binaryCounter"]
+    },
+    {
+      "id": "transistor",
+      "title": "Transistor",
+      "cluster": "machine",
+      "aliases": ["switch", "mosfet", "chip"],
+      "summary": "A tiny electrically controlled switch: the basic building block of every chip.",
+      "levels": {
+        "intro": "A transistor is a switch with no moving parts. Instead of a finger flipping it, a small voltage turns it on or off. A modern chip holds billions of them.",
+        "core": "A transistor has three connections. In the common MOSFET kind they are the source, the drain and the gate. Putting a voltage on the gate lets current flow between source and drain; removing it stops the flow. So one electrical signal controls another, which means transistors can be wired so that the output of one switch drives the gate of the next. That chaining is what lets switches compute.",
+        "deep": "Modern chips use CMOS, pairing two complementary kinds of transistor so that a gate draws almost no current except while switching. Transistors have shrunk from centimetres in 1947 to features a few nanometres across, roughly doubling in count per chip every two years for decades (Moore's law). The cost of switching, and of the heat it produces, is now the main limit on how fast chips can run."
+      },
+      "analogy": "A water tap that is opened by water pressure on a separate pipe instead of by a hand.",
+      "realWorld": ["A phone processor contains tens of billions of transistors", "Amplifiers in speakers and radios", "Solid-state drives store data with transistor-like cells"],
+      "sources": [
+        {"title": "Transistor — Wikipedia", "url": "https://en.wikipedia.org/wiki/Transistor"},
+        {"title": "MOSFET — Wikipedia", "url": "https://en.wikipedia.org/wiki/MOSFET"}
+      ],
+      "diagram": {
+        "nodes": [
+          {"id": "src", "label": "Source", "x": 0.15, "y": 0.6},
+          {"id": "chan", "label": "Channel", "x": 0.5, "y": 0.6, "role": "pill"},
+          {"id": "drain", "label": "Drain", "x": 0.85, "y": 0.6},
+          {"id": "gate", "label": "Gate", "x": 0.5, "y": 0.18},
+          {"id": "off", "label": "Gate off: the channel is closed, no current flows. Reads as 0.", "x": 0.5, "y": 0.88, "role": "note"},
+          {"id": "on", "label": "Gate on: the channel opens, current flows. Reads as 1.", "x": 0.5, "y": 0.88, "role": "note"}
+        ],
+        "edges": [
+          {"from": "src", "to": "chan", "style": "line"},
+          {"from": "chan", "to": "drain", "style": "line"},
+          {"from": "gate", "to": "chan", "label": "voltage"},
+          {"from": "src", "to": "drain", "label": "current", "style": "dashed"}
+        ],
+        "steps": [
+          {"caption": "Two terminals, source and drain, are joined by a channel of silicon.", "show": ["src>chan", "chan>drain"]},
+          {"caption": "Above the channel sits a third terminal, the gate. It isn't connected to the channel directly.", "show": ["gate"]},
+          {"caption": "With no voltage on the gate, the channel blocks current. The switch is off.", "show": ["off"]},
+          {"caption": "Put a voltage on the gate and the channel conducts: current flows from source to drain. The switch is on.", "show": ["gate>chan", "src>drain", "on"], "hide": ["off"]}
+        ]
+      }
+    },
+    {
+      "id": "logic-gates",
+      "title": "Logic gates",
+      "cluster": "machine",
+      "aliases": ["and gate", "or gate", "not gate", "nand", "boolean logic"],
+      "summary": "Small circuits that combine bits using rules like AND, OR and NOT.",
+      "levels": {
+        "intro": "A logic gate takes one or two bits in and gives one bit out by a simple rule. AND outputs 1 only if both inputs are 1. OR outputs 1 if either is. NOT flips its input.",
+        "core": "Gates are built from a few transistors wired together. Two switches in a row (in series) make AND: current gets through only if both are on. Two switches side by side (in parallel) make OR. Every gate is fully described by a truth table listing the output for each combination of inputs; for two inputs there are just four rows. XOR outputs 1 when its inputs differ, which turns out to be exactly what adding two bits needs.",
+        "deep": "NAND (AND followed by NOT) is universal: any logic circuit at all can be built from NAND gates alone, and so can NOR. That means a whole processor is, in principle, one kind of gate repeated millions of times. Gates take a tiny but real time to switch, and the longest chain of gates a signal has to pass through in one tick of the clock limits how fast a chip can run."
+      },
+      "analogy": "Rules for a door: AND is a door needing two keys; OR is a door either key opens.",
+      "realWorld": ["Every calculation in a CPU is done by gates", "Search filters like 'red AND cotton'", "Safety interlocks on machines use AND logic"],
+      "sources": [
+        {"title": "Logic gate — Wikipedia", "url": "https://en.wikipedia.org/wiki/Logic_gate"},
+        {"title": "NAND logic — Wikipedia", "url": "https://en.wikipedia.org/wiki/NAND_logic"}
+      ],
+      "requires": ["transistor", "binary"],
+      "diagram": {
+        "nodes": [
+          {"id": "a", "label": "A = 1", "x": 0.12, "y": 0.3, "role": "pill"},
+          {"id": "b", "label": "B = 0", "x": 0.12, "y": 0.7, "role": "pill"},
+          {"id": "and", "label": "AND", "x": 0.5, "y": 0.3},
+          {"id": "or", "label": "OR", "x": 0.5, "y": 0.7},
+          {"id": "andout", "label": "0", "x": 0.86, "y": 0.3, "role": "pill"},
+          {"id": "orout", "label": "1", "x": 0.86, "y": 0.7, "role": "pill"},
+          {"id": "andrule", "label": "AND: 1 only if both inputs are 1", "x": 0.5, "y": 0.08, "role": "note"},
+          {"id": "orrule", "label": "OR: 1 if at least one input is 1", "x": 0.5, "y": 0.93, "role": "note"}
+        ],
+        "edges": [
+          {"from": "a", "to": "and"},
+          {"from": "b", "to": "and"},
+          {"from": "a", "to": "or"},
+          {"from": "b", "to": "or"},
+          {"from": "and", "to": "andout"},
+          {"from": "or", "to": "orout"}
+        ],
+        "steps": [
+          {"caption": "Two input bits: A is 1 and B is 0.", "show": ["a", "b"]},
+          {"caption": "Both feed an AND gate. Its rule: output 1 only if both inputs are 1.", "show": ["a>and", "b>and", "andrule"]},
+          {"caption": "B is 0, so AND outputs 0.", "show": ["and>andout"]},
+          {"caption": "The same inputs feed an OR gate. Its rule: output 1 if at least one input is 1.", "show": ["a>or", "b>or", "orrule"]},
+          {"caption": "A is 1, so OR outputs 1. Same inputs, different rule, different answer.", "show": ["or>orout"]}
+        ]
+      }
+    },
+    {
+      "id": "adder",
+      "title": "Adder circuit",
+      "cluster": "machine",
+      "aliases": ["half adder", "full adder", "alu", "arithmetic"],
+      "summary": "A handful of logic gates wired to add binary numbers.",
+      "levels": {
+        "intro": "An adder is a small circuit of logic gates that adds numbers. It works exactly like adding on paper: column by column, carrying when needed.",
+        "core": "Adding two bits gives a sum bit and a carry bit: 1 + 1 = 10 in binary, so the sum is 0 and the carry is 1. The sum is the XOR of the inputs (1 when they differ) and the carry is their AND (1 when both are 1). That two-gate circuit is a half adder. A full adder also takes a carry coming in from the column to its right. Chain 64 full adders and you can add two 64-bit numbers.",
+        "deep": "In a simple ripple-carry adder each column waits for the carry from the previous one, so a 64-bit add needs the carry to ripple through 64 stages. Real processors use carry-lookahead designs that work out carries in parallel to save time. Adders sit inside the ALU (arithmetic logic unit), which also subtracts (by adding the two's complement), compares, and performs bitwise operations."
+      },
+      "analogy": "Column addition on paper, done by switches instead of a pencil.",
+      "realWorld": ["Every sum in a spreadsheet passes through adder circuits", "Address calculations inside the CPU", "Counting steps in a fitness tracker"],
+      "sources": [{"title": "Adder (electronics) — Wikipedia", "url": "https://en.wikipedia.org/wiki/Adder_(electronics)"}],
+      "requires": ["logic-gates"],
+      "diagram": {
+        "nodes": [
+          {"id": "a", "label": "A = 1", "x": 0.12, "y": 0.3, "role": "pill"},
+          {"id": "b", "label": "B = 1", "x": 0.12, "y": 0.7, "role": "pill"},
+          {"id": "xor", "label": "XOR", "x": 0.5, "y": 0.3},
+          {"id": "and", "label": "AND", "x": 0.5, "y": 0.7},
+          {"id": "sum", "label": "Sum = 0", "x": 0.86, "y": 0.3, "role": "pill"},
+          {"id": "carry", "label": "Carry = 1", "x": 0.86, "y": 0.7, "role": "pill"},
+          {"id": "result", "label": "1 + 1 = 10 in binary (that's 2)", "x": 0.5, "y": 0.93, "role": "note"}
+        ],
+        "edges": [
+          {"from": "a", "to": "xor"},
+          {"from": "b", "to": "xor"},
+          {"from": "a", "to": "and"},
+          {"from": "b", "to": "and"},
+          {"from": "xor", "to": "sum"},
+          {"from": "and", "to": "carry"}
+        ],
+        "steps": [
+          {"caption": "Add two bits: A = 1 and B = 1.", "show": ["a", "b"]},
+          {"caption": "An XOR gate gives the sum bit: 1 when the inputs differ. Here they're the same, so the sum is 0.", "show": ["a>xor", "b>xor", "xor>sum"]},
+          {"caption": "An AND gate gives the carry bit: 1 when both inputs are 1. Here it is.", "show": ["a>and", "b>and", "and>carry"]},
+          {"caption": "Read carry then sum: 10, which is binary for 2. Two gates just added.", "show": ["result"]}
+        ]
+      }
+    },
+    {
+      "id": "memory",
+      "title": "Memory (RAM)",
+      "cluster": "machine",
+      "aliases": ["ram", "address", "flip-flop", "dram"],
+      "summary": "Numbered slots that hold bytes, each found by its address.",
+      "levels": {
+        "intro": "Memory is a very long row of numbered boxes. Each box holds one byte, and the box's number is its address. To read or write, the computer names the address.",
+        "core": "RAM (random access memory) can reach any address in about the same time, unlike a tape that must be wound through. A program's variables, its instructions, and the data it works on all live in memory while it runs. To read, the processor sends an address; the memory sends back the byte stored there. To write, it sends an address and a new value. Turn the power off and RAM forgets everything, which is why files are saved to storage.",
+        "deep": "A single stored bit can be built from gates arranged in a loop that keeps feeding its own output back in (a latch or flip-flop); that's how CPU registers and caches work. Main memory instead uses DRAM: each bit is a tiny capacitor plus one transistor, far denser but leaky, so every cell must be refreshed thousands of times a second. Reaching main memory takes around 100 nanoseconds, hundreds of CPU clock ticks, which is why caches exist."
+      },
+      "analogy": "A street of numbered post-office boxes, each holding one small note.",
+      "realWorld": ["Browser tabs each occupy memory", "Games load levels into RAM", "Phones list RAM size, like 8 GB"],
+      "sources": [
+        {"title": "Random-access memory — Wikipedia", "url": "https://en.wikipedia.org/wiki/Random-access_memory"},
+        {"title": "Memory address — Wikipedia", "url": "https://en.wikipedia.org/wiki/Memory_address"}
+      ],
+      "requires": ["logic-gates"],
+      "diagram": {
+        "nodes": [
+          {"id": "cpu", "label": "Processor", "x": 0.15, "y": 0.5},
+          {"id": "m0", "label": "100 │ 42", "x": 0.75, "y": 0.14, "role": "pill"},
+          {"id": "m1", "label": "101 │ 7", "x": 0.75, "y": 0.32, "role": "pill"},
+          {"id": "m2", "label": "102 │ 19", "x": 0.75, "y": 0.5, "role": "pill"},
+          {"id": "m3", "label": "103 │ 0", "x": 0.75, "y": 0.68, "role": "pill"},
+          {"id": "m3b", "label": "103 │ 99", "x": 0.75, "y": 0.68, "role": "pill"},
+          {"id": "legend", "label": "address │ value", "x": 0.75, "y": 0.88, "role": "note"}
+        ],
+        "edges": [
+          {"from": "cpu", "to": "m2", "label": "read 102"},
+          {"from": "m2", "to": "cpu", "label": "19", "style": "dashed"},
+          {"from": "cpu", "to": "m3b", "label": "write 99 to 103"}
+        ],
+        "steps": [
+          {"caption": "Memory is a column of numbered slots. Each has an address (left) and holds a value (right).", "show": ["m0", "m1", "m2", "m3", "legend"]},
+          {"caption": "The processor sits outside memory and talks to it by address.", "show": ["cpu"]},
+          {"caption": "To read, it sends an address: 'what's in 102?'", "show": ["cpu>m2"]},
+          {"caption": "Memory answers with the value stored there: 19.", "show": ["m2>cpu"]},
+          {"caption": "To write, it sends an address and a value. Slot 103 now holds 99; the old 0 is gone.", "show": ["cpu>m3b"], "hide": ["m3", "cpu>m2", "m2>cpu"]}
+        ]
+      }
+    },
+    {
+      "id": "cpu",
+      "title": "CPU",
+      "cluster": "machine",
+      "aliases": ["processor", "central processing unit", "register", "clock speed", "alu"],
+      "summary": "The part of a computer that follows instructions, one tiny step at a time.",
+      "levels": {
+        "intro": "The CPU is the computer's worker. It reads simple instructions from memory, like 'add these two numbers', and carries them out billions of times a second.",
+        "core": "A CPU has a few key parts. Registers are a handful of very fast storage slots right inside it. The ALU does arithmetic and comparisons. The control unit reads each instruction and routes data between registers, the ALU and memory. A clock ticks billions of times per second (that's the GHz figure) and keeps every part in step. A special register, the program counter, holds the address of the next instruction.",
+        "deep": "Modern CPUs do far more than one instruction per tick. Pipelining overlaps the stages of consecutive instructions like an assembly line; superscalar designs issue several at once; out-of-order execution runs instructions whose inputs are ready while others wait; branch prediction guesses which way an 'if' will go so the pipeline doesn't stall. A chip also holds several cores, each a complete CPU, so separate threads can truly run at the same time."
+      },
+      "analogy": "A very fast, very literal clerk with a small desk (registers) and a huge filing cabinet (memory).",
+      "realWorld": ["Phone and laptop processors", "Microcontrollers inside washing machines and cars", "Game consoles"],
+      "sources": [
+        {"title": "Central processing unit — Wikipedia", "url": "https://en.wikipedia.org/wiki/Central_processing_unit"},
+        {"title": "Processor register — Wikipedia", "url": "https://en.wikipedia.org/wiki/Processor_register"}
+      ],
+      "requires": ["adder", "memory"],
+      "diagram": {
+        "nodes": [
+          {"id": "cu", "label": "Control unit", "x": 0.3, "y": 0.18},
+          {"id": "reg", "label": "Registers\nR1 = 5  R2 = 3", "x": 0.3, "y": 0.5},
+          {"id": "alu", "label": "ALU", "x": 0.3, "y": 0.82},
+          {"id": "ram", "label": "Memory", "x": 0.82, "y": 0.5},
+          {"id": "clock", "label": "Clock: ticks keep every part in step", "x": 0.75, "y": 0.12, "role": "note"},
+          {"id": "res", "label": "R1 = 8", "x": 0.75, "y": 0.86, "role": "pill"}
+        ],
+        "edges": [
+          {"from": "ram", "to": "cu", "label": "instruction"},
+          {"from": "cu", "to": "reg", "label": "add R1, R2"},
+          {"from": "reg", "to": "alu", "label": "5, 3"},
+          {"from": "alu", "to": "res", "label": "8"}
+        ],
+        "steps": [
+          {"caption": "Inside the CPU: a control unit, a few registers, and an ALU that does the arithmetic. Memory is outside.", "show": ["cu", "reg", "alu", "ram"]},
+          {"caption": "A clock ticks billions of times a second; each part acts on the tick.", "show": ["clock"]},
+          {"caption": "The control unit fetches the next instruction from memory: 'add R1 and R2'.", "show": ["ram>cu"]},
+          {"caption": "It tells the registers to send their values, 5 and 3, to the ALU.", "show": ["cu>reg", "reg>alu"]},
+          {"caption": "The ALU adds them and the result, 8, is written back into R1.", "show": ["alu>res"]}
+        ]
+      }
+    },
+    {
+      "id": "instruction-cycle",
+      "title": "Fetch–decode–execute",
+      "cluster": "machine",
+      "aliases": ["instruction cycle", "machine code", "program counter", "fetch decode execute"],
+      "summary": "The loop every processor runs forever: get an instruction, work out what it means, do it.",
+      "levels": {
+        "intro": "A CPU runs one loop over and over: fetch the next instruction, decode what it means, execute it. Every app you use is this loop repeated billions of times.",
+        "core": "Fetch: the CPU reads the instruction at the address in the program counter and moves the counter on to the next one. Decode: it splits the instruction's bits into an operation (say, add) and operands (which registers or addresses). Execute: the ALU computes, or data moves to or from memory, and results are written back. A jump instruction simply overwrites the program counter, which is how loops and if-statements work at the lowest level.",
+        "deep": "Instructions are just numbers in memory; this stored-program idea (von Neumann architecture) means programs can be loaded, generated and modified like data. Each CPU family has its own instruction set: ARM in phones and recent Macs, x86-64 in most PCs. In pipelined CPUs the stages of the cycle overlap, so while one instruction executes, the next is being decoded and the one after that fetched."
+      },
+      "analogy": "Following a recipe: read the next line, work out what it asks, do it, move to the next line.",
+      "realWorld": ["Every running app", "Emulators run another CPU's cycle in software", "Debuggers step through instructions one at a time"],
+      "sources": [
+        {"title": "Instruction cycle — Wikipedia", "url": "https://en.wikipedia.org/wiki/Instruction_cycle"},
+        {"title": "Von Neumann architecture — Wikipedia", "url": "https://en.wikipedia.org/wiki/Von_Neumann_architecture"}
+      ],
+      "requires": ["cpu"],
+      "diagram": {
+        "nodes": [
+          {"id": "fetch", "label": "Fetch\nread instruction at PC", "x": 0.5, "y": 0.13},
+          {"id": "decode", "label": "Decode\nwork out operation and inputs", "x": 0.82, "y": 0.6},
+          {"id": "execute", "label": "Execute\ncompute, store result", "x": 0.18, "y": 0.6},
+          {"id": "pc", "label": "PC = program counter: address of the next instruction", "x": 0.5, "y": 0.92, "role": "note"},
+          {"id": "jump", "label": "A jump just changes the PC", "x": 0.5, "y": 0.45, "role": "note"}
+        ],
+        "edges": [
+          {"from": "fetch", "to": "decode"},
+          {"from": "decode", "to": "execute"},
+          {"from": "execute", "to": "fetch", "label": "repeat"}
+        ],
+        "steps": [
+          {"caption": "Fetch: read the instruction at the address in the program counter, then move the counter forward.", "show": ["fetch", "pc"]},
+          {"caption": "Decode: split the instruction's bits into what to do and what to do it to.", "show": ["fetch>decode"]},
+          {"caption": "Execute: the ALU computes, or data moves to or from memory.", "show": ["decode>execute"]},
+          {"caption": "Back to fetch. This loop never stops while the computer is on.", "show": ["execute>fetch"]},
+          {"caption": "Loops and if-statements are just instructions that change the program counter.", "show": ["jump"]}
+        ]
+      }
+    },
+    {
+      "id": "cache",
+      "title": "CPU cache",
+      "cluster": "machine",
+      "aliases": ["cache", "l1", "l2", "memory hierarchy", "locality"],
+      "summary": "A small, very fast memory next to the CPU that keeps recently used data close.",
+      "destination": true,
+      "levels": {
+        "intro": "Main memory is slow compared to the CPU. A cache is a small, fast memory that keeps copies of recently used data right next to the processor, so most reads don't have to wait.",
+        "core": "When the CPU needs an address, it checks the cache first. If the data is there (a hit) it arrives in a few clock ticks; if not (a miss) it is fetched from main memory, taking hundreds of ticks, and a copy is kept in the cache. Data moves in blocks called cache lines, typically 64 bytes, so neighbours of what you asked for come along too. Caches work because programs tend to reuse recent data (temporal locality) and use nearby data next (spatial locality).",
+        "deep": "CPUs stack several levels: L1 is tiny and takes about a nanosecond, L2 is bigger and slower, and L3 is shared among cores. When the cache is full, a replacement policy such as least-recently-used decides what to evict. Code that walks an array in order is much faster than code that jumps randomly through memory, even when both do the same arithmetic, purely because of cache behaviour. The same idea reappears at every scale: browser caches, CDNs and DNS caches."
+      },
+      "analogy": "Keeping the books you're using on your desk instead of walking to the library each time.",
+      "realWorld": ["L1, L2 and L3 caches in every modern CPU", "Browsers cache images so pages reload faster", "Content delivery networks cache websites near users"],
+      "sources": [
+        {"title": "CPU cache — Wikipedia", "url": "https://en.wikipedia.org/wiki/CPU_cache"},
+        {"title": "Locality of reference — Wikipedia", "url": "https://en.wikipedia.org/wiki/Locality_of_reference"}
+      ],
+      "requires": ["cpu"],
+      "diagram": {
+        "nodes": [
+          {"id": "cpu", "label": "CPU", "x": 0.12, "y": 0.45},
+          {"id": "cache", "label": "Cache\nsmall · ~1 ns", "x": 0.48, "y": 0.45},
+          {"id": "ram", "label": "Main memory\nlarge · ~100 ns", "x": 0.86, "y": 0.45},
+          {"id": "miss", "label": "Miss: not in cache, fetch from memory and keep a copy", "x": 0.5, "y": 0.85, "role": "note"},
+          {"id": "hit", "label": "Hit: already in cache, answered in about a nanosecond", "x": 0.5, "y": 0.85, "role": "note"}
+        ],
+        "edges": [
+          {"from": "cpu", "to": "cache", "label": "need X"},
+          {"from": "cache", "to": "ram", "label": "not here", "style": "dashed"},
+          {"from": "ram", "to": "cache", "label": "X + neighbours"},
+          {"from": "cache", "to": "cpu", "label": "X"}
+        ],
+        "steps": [
+          {"caption": "The CPU, a small fast cache, and large slow main memory, in a row.", "show": ["cpu", "cache", "ram"]},
+          {"caption": "The CPU asks for X. It checks the cache first.", "show": ["cpu>cache"]},
+          {"caption": "The first time, X isn't there: a miss. The request goes on to main memory, roughly 100 times slower.", "show": ["cache>ram"]},
+          {"caption": "Memory sends X plus its neighbours (a whole cache line), and the cache keeps a copy.", "show": ["ram>cache", "miss"]},
+          {"caption": "Next time the CPU asks for X, or a neighbour, the cache answers straight away: a hit.", "show": ["cache>cpu", "hit"], "hide": ["miss", "cache>ram", "ram>cache"]}
+        ]
+      }
+    },
+    {
+      "id": "operating-system",
+      "title": "Operating system",
+      "cluster": "machine",
+      "aliases": ["os", "kernel", "system call", "ios", "linux"],
+      "summary": "The software that shares one computer's hardware safely among many programs.",
+      "levels": {
+        "intro": "The operating system is the manager of the computer. It decides which app gets to run, gives each one memory, and controls access to files, the screen and the network.",
+        "core": "The core of the OS, the kernel, runs with full hardware privileges; apps run in a restricted mode. When an app wants something only the kernel may do, like reading a file or sending a network packet, it makes a system call and the kernel does it on its behalf, after checking permissions. The kernel also switches the CPU between programs many times a second so that they all appear to run at once, and gives each its own private view of memory.",
+        "deep": "Virtual memory gives every process its own address space: the hardware translates each address the program uses into a real physical address via page tables the kernel controls, so one app cannot read another's memory. Drivers translate generic requests into commands for specific hardware. A timer interrupt hands control back to the kernel regularly so a stuck program cannot freeze the whole machine. iOS and macOS share the same kernel, XNU; Android is built on Linux."
+      },
+      "analogy": "A building manager who hands out rooms, keys and time slots so tenants never trip over each other.",
+      "realWorld": ["iOS, Android, Windows, macOS, Linux", "App permission prompts are the OS guarding hardware", "Task managers show what the OS is running"],
+      "sources": [
+        {"title": "Operating system — Wikipedia", "url": "https://en.wikipedia.org/wiki/Operating_system"},
+        {"title": "System call — Wikipedia", "url": "https://en.wikipedia.org/wiki/System_call"}
+      ],
+      "requires": ["instruction-cycle"],
+      "diagram": {
+        "nodes": [
+          {"id": "app1", "label": "Music app", "x": 0.2, "y": 0.12},
+          {"id": "app2", "label": "Browser", "x": 0.5, "y": 0.12},
+          {"id": "app3", "label": "Messages", "x": 0.8, "y": 0.12},
+          {"id": "kernel", "label": "Kernel (operating system)", "x": 0.5, "y": 0.5},
+          {"id": "cpu", "label": "CPU", "x": 0.15, "y": 0.86, "role": "pill"},
+          {"id": "mem", "label": "Memory", "x": 0.38, "y": 0.86, "role": "pill"},
+          {"id": "disk", "label": "Storage", "x": 0.62, "y": 0.86, "role": "pill"},
+          {"id": "net", "label": "Network", "x": 0.85, "y": 0.86, "role": "pill"},
+          {"id": "rule", "label": "Apps never touch hardware directly", "x": 0.5, "y": 0.31, "role": "note"}
+        ],
+        "edges": [
+          {"from": "app2", "to": "kernel", "label": "system call: send data"},
+          {"from": "kernel", "to": "net"},
+          {"from": "kernel", "to": "cpu", "style": "line"},
+          {"from": "kernel", "to": "mem", "style": "line"},
+          {"from": "kernel", "to": "disk", "style": "line"}
+        ],
+        "steps": [
+          {"caption": "At the bottom: the hardware every app wants to use.", "show": ["cpu", "mem", "disk", "net"]},
+          {"caption": "In the middle: the kernel, the only software allowed to control hardware directly.", "show": ["kernel", "kernel>cpu", "kernel>mem", "kernel>disk"]},
+          {"caption": "At the top: apps, each running in a restricted mode.", "show": ["app1", "app2", "app3", "rule"]},
+          {"caption": "When the browser needs the network, it asks the kernel with a system call.", "show": ["app2>kernel"]},
+          {"caption": "The kernel checks permission and drives the hardware for it.", "show": ["kernel>net"]}
+        ]
+      }
+    },
+    {
+      "id": "process-thread",
+      "title": "Processes and threads",
+      "cluster": "machine",
+      "aliases": ["process", "thread", "concurrency", "multitasking", "context switch"],
+      "summary": "A process is a running program with its own memory; threads are workers inside it that share that memory.",
+      "destination": true,
+      "levels": {
+        "intro": "Each running app is a process, with its own private memory. Inside a process, threads are separate lines of work that run at the same time and share the same memory.",
+        "core": "The operating system isolates processes: one cannot read another's memory, so a crashing app doesn't take others down. Threads within one process share memory, so they can cooperate cheaply, but they can also interfere: if two threads update the same value at once, one update can be lost (a race condition). Locks and other synchronisation tools force threads to take turns on shared data. Every thread has its own call stack and its own place in the code.",
+        "deep": "The scheduler runs threads in time slices; switching from one to another (a context switch) saves one thread's registers and loads another's. On a multi-core chip, threads of one process genuinely run in parallel. iOS apps keep all user-interface work on the main thread and push slow work like networking to background threads, so scrolling stays smooth. Deadlock happens when two threads each hold a lock the other is waiting for, and neither can move."
+      },
+      "analogy": "A process is a kitchen; threads are cooks sharing its counters. Separate kitchens can't mess with each other, but cooks in one kitchen can bump into each other.",
+      "realWorld": ["Each browser tab often runs as its own process", "Apps download in the background while you scroll", "Activity Monitor and Task Manager list processes"],
+      "sources": [
+        {"title": "Process (computing) — Wikipedia", "url": "https://en.wikipedia.org/wiki/Process_(computing)"},
+        {"title": "Thread (computing) — Wikipedia", "url": "https://en.wikipedia.org/wiki/Thread_(computing)"},
+        {"title": "Race condition — Wikipedia", "url": "https://en.wikipedia.org/wiki/Race_condition"}
+      ],
+      "requires": ["operating-system"],
+      "diagram": {
+        "nodes": [
+          {"id": "p1", "label": "Process A\nown memory", "x": 0.27, "y": 0.2},
+          {"id": "p2", "label": "Process B\nown memory", "x": 0.75, "y": 0.2},
+          {"id": "t1", "label": "Thread 1", "x": 0.14, "y": 0.6, "role": "pill"},
+          {"id": "t2", "label": "Thread 2", "x": 0.4, "y": 0.6, "role": "pill"},
+          {"id": "t3", "label": "Thread 1", "x": 0.75, "y": 0.6, "role": "pill"},
+          {"id": "shared", "label": "Threads of A share A's memory", "x": 0.27, "y": 0.86, "role": "note"},
+          {"id": "wall", "label": "A and B can't see each other's memory", "x": 0.75, "y": 0.86, "role": "note"}
+        ],
+        "edges": [
+          {"from": "p1", "to": "t1", "style": "line"},
+          {"from": "p1", "to": "t2", "style": "line"},
+          {"from": "p2", "to": "t3", "style": "line"},
+          {"from": "t1", "to": "t2", "label": "share data", "style": "both"}
+        ],
+        "steps": [
+          {"caption": "Two running programs: process A and process B. Each has its own private memory.", "show": ["p1", "p2"]},
+          {"caption": "The OS walls them off from each other. A crash in one doesn't break the other.", "show": ["wall"]},
+          {"caption": "Inside process A run two threads: separate lines of work happening at the same time.", "show": ["p1>t1", "p1>t2", "p2>t3"]},
+          {"caption": "A's threads share A's memory, so they can pass data cheaply, but must take turns when changing the same thing.", "show": ["t1>t2", "shared"]}
+        ]
+      }
+    },
+    {
+      "id": "compiler",
+      "title": "Compiler",
+      "cluster": "machine",
+      "aliases": ["compilation", "source code", "machine code", "interpreter", "swift"],
+      "summary": "A program that translates code people write into instructions a CPU can run.",
+      "destination": true,
+      "levels": {
+        "intro": "People write programs in languages like Swift or Python. CPUs only understand numeric machine instructions. A compiler translates one into the other, ahead of time.",
+        "core": "A compiler works in stages. First it splits the source text into tokens (names, numbers, symbols). Then it parses the tokens into a tree that shows the program's structure. It checks types and rules, reporting errors with line numbers. Then it generates machine code for the target CPU, often optimising along the way, for example by computing 2 * 60 once instead of every time. The output is an executable file that runs without the compiler.",
+        "deep": "Many compilers first translate into an intermediate representation, a simplified language that is easy to optimise, and only then into a specific instruction set. Swift, Rust and C use the LLVM project this way, which lets one optimiser serve many languages and CPUs. An interpreter instead runs source code directly, step by step, and just-in-time compilers (as in JavaScript engines) compile the hot parts of a program while it runs."
+      },
+      "analogy": "Translating a whole book before publishing it, rather than interpreting live sentence by sentence.",
+      "realWorld": ["Xcode compiles Swift into the app on your phone", "Web browsers compile JavaScript as pages run", "Compiler error messages pointing to a line of code"],
+      "sources": [
+        {"title": "Compiler — Wikipedia", "url": "https://en.wikipedia.org/wiki/Compiler"},
+        {"title": "LLVM — Wikipedia", "url": "https://en.wikipedia.org/wiki/LLVM"}
+      ],
+      "requires": ["instruction-cycle"],
+      "diagram": {
+        "nodes": [
+          {"id": "src", "label": "Source code\nlet total = price * 2", "x": 0.5, "y": 0.08},
+          {"id": "tokens", "label": "Tokens\nlet · total · = · price · * · 2", "x": 0.5, "y": 0.3},
+          {"id": "tree", "label": "Syntax tree\nassign total ← (price × 2)", "x": 0.5, "y": 0.52},
+          {"id": "check", "label": "Checks: is price a number?", "x": 0.86, "y": 0.52, "role": "note"},
+          {"id": "code", "label": "Machine code\nload · multiply · store", "x": 0.5, "y": 0.74},
+          {"id": "cpu", "label": "CPU runs it", "x": 0.5, "y": 0.93, "role": "pill"}
+        ],
+        "edges": [
+          {"from": "src", "to": "tokens", "label": "split"},
+          {"from": "tokens", "to": "tree", "label": "parse"},
+          {"from": "tree", "to": "code", "label": "generate"},
+          {"from": "code", "to": "cpu"}
+        ],
+        "steps": [
+          {"caption": "Start with a line written by a person.", "show": ["src"]},
+          {"caption": "Split the text into tokens: names, symbols and numbers.", "show": ["src>tokens"]},
+          {"caption": "Parse the tokens into a tree that shows what the line means: multiply, then assign.", "show": ["tokens>tree"]},
+          {"caption": "Check the rules. If price were text, the compiler would stop here with an error.", "show": ["check"]},
+          {"caption": "Generate CPU instructions: load price, multiply by 2, store into total.", "show": ["tree>code"]},
+          {"caption": "The result runs directly on the CPU, with no compiler needed any more.", "show": ["code>cpu"]}
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,316 @@
+{
+  "cluster": {
+    "id": "data",
+    "name": "Data structures",
+    "blurb": "Ways of arranging data in memory so the questions you ask of it are fast.",
+    "hue": "green"
+  },
+  "topics": [
+    {
+      "id": "array",
+      "title": "Array",
+      "cluster": "data",
+      "aliases": ["list", "index", "contiguous"],
+      "summary": "Items stored side by side in memory, found instantly by position.",
+      "levels": {
+        "intro": "An array is a row of slots in memory, one item per slot, numbered from 0. Asking for item number 5 is instant, because the computer can work out exactly where it is.",
+        "core": "Because the items sit next to each other and are all the same size, the address of item i is simply start + i × size. That makes reading or changing any item a single step, written O(1). The cost comes when you insert or delete in the middle: every item after that point has to shift over by one, which takes time proportional to the length, O(n). Arrays are also cache-friendly, since walking through them reads memory in order.",
+        "deep": "A fixed array can't grow, so languages provide dynamic arrays (Swift's Array, Python's list) that reserve spare capacity and, when full, copy everything into a block about twice as large. Doubling means the occasional expensive copy averages out to O(1) per append, called amortised constant time. Two-dimensional grids such as images are usually stored as one long array, row after row, with item (row, column) at row × width + column."
+      },
+      "analogy": "A row of numbered lockers: you can walk straight to locker 37.",
+      "realWorld": ["Pixels of an image", "A playlist's songs in order", "Columns of a spreadsheet"],
+      "sources": [
+        {"title": "Array (data structure) — Wikipedia", "url": "https://en.wikipedia.org/wiki/Array_(data_structure)"},
+        {"title": "Dynamic array — Wikipedia", "url": "https://en.wikipedia.org/wiki/Dynamic_array"}
+      ],
+      "requires": ["memory"],
+      "diagram": {
+        "nodes": [
+          {"id": "c0", "label": "12", "x": 0.14, "y": 0.4},
+          {"id": "c1", "label": "7", "x": 0.32, "y": 0.4},
+          {"id": "c2", "label": "31", "x": 0.5, "y": 0.4},
+          {"id": "c3", "label": "4", "x": 0.68, "y": 0.4},
+          {"id": "c4", "label": "19", "x": 0.86, "y": 0.4},
+          {"id": "i0", "label": "index 0\naddr 200", "x": 0.14, "y": 0.62, "role": "note"},
+          {"id": "i1", "label": "index 1\naddr 204", "x": 0.32, "y": 0.62, "role": "note"},
+          {"id": "i2", "label": "index 2\naddr 208", "x": 0.5, "y": 0.62, "role": "note"},
+          {"id": "i3", "label": "index 3\naddr 212", "x": 0.68, "y": 0.62, "role": "note"},
+          {"id": "i4", "label": "index 4\naddr 216", "x": 0.86, "y": 0.62, "role": "note"},
+          {"id": "q", "label": "item 3?", "x": 0.68, "y": 0.1, "role": "pill"},
+          {"id": "math", "label": "address = 200 + 3 × 4 = 212 → one step, no searching", "x": 0.5, "y": 0.88, "role": "note"}
+        ],
+        "edges": [
+          {"from": "q", "to": "c3"}
+        ],
+        "steps": [
+          {"caption": "Five numbers stored side by side in memory.", "show": ["c0", "c1", "c2", "c3", "c4"]},
+          {"caption": "Each slot has an index, starting at 0. Each number takes 4 bytes, so addresses go up by 4.", "show": ["i0", "i1", "i2", "i3", "i4"]},
+          {"caption": "Ask for item 3.", "show": ["q"]},
+          {"caption": "The computer doesn't search. It calculates the address directly and jumps there.", "show": ["q>c3", "math"]}
+        ]
+      }
+    },
+    {
+      "id": "pointers",
+      "title": "Pointers and references",
+      "cluster": "data",
+      "aliases": ["pointer", "reference", "address", "null"],
+      "summary": "A value that holds the address of some other data, instead of the data itself.",
+      "levels": {
+        "intro": "A pointer is a note that says where something lives instead of being the thing. Like writing down a house address rather than carrying the house around.",
+        "core": "In memory, a pointer is just a number: an address. Following it (dereferencing) means going to that address and reading what's there. Pointers let many parts of a program share one piece of data without copying it, and they let data structures link pieces together that live in different parts of memory. A pointer to nothing is called null; following a null pointer is one of the most common crashes in programming.",
+        "deep": "Swift and many modern languages hide raw addresses behind references and optionals: a class instance is accessed by reference, and Optional forces you to deal with the 'nothing here' case before you can use the value, which removes most null-pointer crashes. Memory managers track how many references point at each object (Swift uses automatic reference counting) and free the object when the count drops to zero. Two objects referring to each other can keep each other alive forever, which is a memory leak."
+      },
+      "analogy": "A library catalogue card telling you which shelf a book is on.",
+      "realWorld": ["Hyperlinks point to pages instead of copying them", "Shortcuts and aliases on a desktop", "Every class object in Swift is used through a reference"],
+      "sources": [
+        {"title": "Pointer (computer programming) — Wikipedia", "url": "https://en.wikipedia.org/wiki/Pointer_(computer_programming)"},
+        {"title": "Null pointer — Wikipedia", "url": "https://en.wikipedia.org/wiki/Null_pointer"}
+      ],
+      "requires": ["memory"],
+      "diagram": {
+        "nodes": [
+          {"id": "p", "label": "p │ 508", "x": 0.2, "y": 0.35},
+          {"id": "plabel", "label": "address 104", "x": 0.2, "y": 0.55, "role": "note"},
+          {"id": "d", "label": "\"Hello\"", "x": 0.78, "y": 0.35},
+          {"id": "dlabel", "label": "address 508", "x": 0.78, "y": 0.55, "role": "note"},
+          {"id": "q", "label": "q │ 508", "x": 0.2, "y": 0.78},
+          {"id": "share", "label": "Two pointers, one copy of the data", "x": 0.6, "y": 0.88, "role": "note"}
+        ],
+        "edges": [
+          {"from": "p", "to": "d", "label": "follow"},
+          {"from": "q", "to": "d", "style": "dashed"}
+        ],
+        "steps": [
+          {"caption": "Some data, the text Hello, is stored at address 508.", "show": ["d", "dlabel"]},
+          {"caption": "Elsewhere, at address 104, a variable p holds the number 508. That's all a pointer is.", "show": ["p", "plabel"]},
+          {"caption": "Following p means going to address 508 and reading what's there.", "show": ["p>d"]},
+          {"caption": "A second pointer q can hold the same address. Both lead to one shared copy; nothing was duplicated.", "show": ["q>d", "share"]}
+        ]
+      }
+    },
+    {
+      "id": "linked-list",
+      "title": "Linked list",
+      "cluster": "data",
+      "aliases": ["linked list", "node", "singly linked", "doubly linked"],
+      "summary": "A chain of items, each holding a pointer to the next one.",
+      "levels": {
+        "intro": "A linked list is a chain. Each item holds its value plus a pointer to the next item. To find something you follow the chain from the start.",
+        "core": "Unlike an array, the items (called nodes) can live anywhere in memory; only the pointers tie them together. That makes inserting or removing an item cheap once you are at the right spot: just redirect a pointer or two, with no shifting, O(1). The cost is that there is no jumping straight to item 50: you must walk 50 links from the head, O(n). A doubly linked list also stores a pointer back to the previous node.",
+        "deep": "Linked lists suit data that changes constantly at known places: queues, undo histories, an LRU cache's ordering of recent items. In practice they are often slower than arrays even where the theory favours them, because each node can sit far from the next in memory, so walking the list misses the cache at every step. Persistent linked lists, used in functional languages, let many versions of a list share their common tail safely."
+      },
+      "analogy": "A treasure hunt where each clue tells you where to find the next one.",
+      "realWorld": ["Undo and redo history in editors", "The order of recently used items in a cache", "Music player 'next track' chains"],
+      "sources": [{"title": "Linked list — Wikipedia", "url": "https://en.wikipedia.org/wiki/Linked_list"}],
+      "requires": ["pointers"],
+      "diagram": {
+        "nodes": [
+          {"id": "head", "label": "head", "x": 0.08, "y": 0.4, "role": "note"},
+          {"id": "a", "label": "A", "x": 0.25, "y": 0.4},
+          {"id": "b", "label": "B", "x": 0.5, "y": 0.4},
+          {"id": "c", "label": "C", "x": 0.75, "y": 0.4},
+          {"id": "end", "label": "null", "x": 0.93, "y": 0.4, "role": "note"},
+          {"id": "n", "label": "N", "x": 0.62, "y": 0.78},
+          {"id": "done", "label": "Two pointers changed. Nothing else moved.", "x": 0.5, "y": 0.1, "role": "note"}
+        ],
+        "edges": [
+          {"from": "head", "to": "a"},
+          {"from": "a", "to": "b"},
+          {"from": "b", "to": "c"},
+          {"from": "c", "to": "end"},
+          {"from": "n", "to": "c"},
+          {"from": "b", "to": "n"}
+        ],
+        "steps": [
+          {"caption": "Three nodes, A, B and C. Each points to the next; the head points to the first.", "show": ["head>a", "a>b", "b>c"]},
+          {"caption": "The last node points to null: the end of the chain.", "show": ["c>end"]},
+          {"caption": "To insert N between B and C, first create N anywhere in memory.", "show": ["n"]},
+          {"caption": "Point N at C.", "show": ["n>c"]},
+          {"caption": "Then point B at N instead of C. N is now in the chain.", "show": ["b>n", "done"], "hide": ["b>c"]}
+        ]
+      }
+    },
+    {
+      "id": "stack",
+      "title": "Stack",
+      "cluster": "data",
+      "aliases": ["lifo", "push", "pop", "last in first out"],
+      "summary": "A pile where you only add or remove at the top: last in, first out.",
+      "levels": {
+        "intro": "A stack is like a pile of plates. You put new plates on top and take plates from the top. The last one you put on is the first one you take off.",
+        "core": "A stack has two main operations: push (add on top) and pop (remove from the top), plus peek to look at the top without removing it. All of them take O(1) time. That rule, last in first out (LIFO), is exactly what you need whenever the most recent unfinished thing must be finished first: undo, matching brackets, and keeping track of which function called which. It's easily built on an array by only adding and removing at the end.",
+        "deep": "The call stack that runs every program is the most important stack of all: each function call pushes a frame with its local variables and return address, and returning pops it. Depth-first search uses a stack to remember where to backtrack. Calculators evaluate expressions like 3 4 + 2 × (reverse Polish notation) with a stack. If you push forever without popping, you get a stack overflow."
+      },
+      "analogy": "A stack of plates in a cafeteria.",
+      "realWorld": ["Undo in any editor", "The back button history in a browser", "Checking that brackets in code are balanced"],
+      "sources": [{"title": "Stack (abstract data type) — Wikipedia", "url": "https://en.wikipedia.org/wiki/Stack_(abstract_data_type)"}],
+      "requires": ["array"],
+      "simulations": ["stackOps"]
+    },
+    {
+      "id": "queue",
+      "title": "Queue",
+      "cluster": "data",
+      "aliases": ["fifo", "enqueue", "dequeue", "first in first out"],
+      "summary": "A line where items join at the back and leave from the front: first in, first out.",
+      "levels": {
+        "intro": "A queue is a line at a shop. People join at the back and are served from the front, so whoever arrived first is served first.",
+        "core": "A queue's operations are enqueue (add at the back) and dequeue (remove from the front), both O(1) when built well. This first in, first out (FIFO) order is fair and preserves sequence, so queues appear wherever work arrives faster than it can be handled: print jobs, messages, network packets waiting to be sent. A naive array queue would shift everything left on each dequeue, so real ones use a ring buffer that wraps around, or a linked list.",
+        "deep": "A ring buffer keeps head and tail indices into a fixed array and advances them with modular arithmetic: index = (index + 1) mod capacity. Breadth-first search uses a queue to explore a graph level by level. A priority queue is a different idea: the next item out is the most important one, not the oldest, and it is usually built from a heap. Distributed systems connect services through message queues so that a slow consumer doesn't block a fast producer."
+      },
+      "analogy": "A line at a ticket booth.",
+      "realWorld": ["Print queues", "Messages waiting to be delivered", "Video buffering ahead of playback"],
+      "sources": [
+        {"title": "Queue (abstract data type) — Wikipedia", "url": "https://en.wikipedia.org/wiki/Queue_(abstract_data_type)"},
+        {"title": "Circular buffer — Wikipedia", "url": "https://en.wikipedia.org/wiki/Circular_buffer"}
+      ],
+      "requires": ["array"],
+      "simulations": ["queueOps"]
+    },
+    {
+      "id": "hash-table",
+      "title": "Hash table",
+      "cluster": "data",
+      "aliases": ["hash map", "dictionary", "hashing", "hash function", "collision"],
+      "summary": "Stores key–value pairs and finds any key almost instantly by computing where it should be.",
+      "levels": {
+        "intro": "A hash table finds things by name instantly. It turns each name into a number that says which bucket to put it in, so later it can go straight to that bucket.",
+        "core": "A hash function turns a key, like a word, into a number; that number mod the table size picks a bucket. To store a pair you compute the bucket and put it there; to look up a key you compute the same bucket and check it. Different keys sometimes land in the same bucket (a collision), so each bucket holds a short list. With a good hash function and enough buckets, lists stay short and lookups take O(1) on average.",
+        "deep": "When the table gets too full (its load factor rises past a threshold), it grows, typically doubling, and rehashes every key into the new buckets. A poor hash function sends many keys to the same bucket and degrades lookups to O(n); attackers have exploited this to slow servers down, so modern languages, Swift included, seed their hash functions randomly per run. Hash tables are behind Swift's Dictionary and Set, Python's dict, database indexes and caches."
+      },
+      "analogy": "A coat check: your ticket number tells the attendant exactly which hook to go to.",
+      "realWorld": ["Swift Dictionary and Set", "Looking up a username at login", "Caches mapping a URL to stored content"],
+      "sources": [
+        {"title": "Hash table — Wikipedia", "url": "https://en.wikipedia.org/wiki/Hash_table"},
+        {"title": "Hash function — Wikipedia", "url": "https://en.wikipedia.org/wiki/Hash_function"}
+      ],
+      "requires": ["array", "modular-arithmetic"],
+      "simulations": ["hashInsert"]
+    },
+    {
+      "id": "tree",
+      "title": "Tree",
+      "cluster": "data",
+      "aliases": ["trees", "root", "leaf", "parent", "child", "hierarchy"],
+      "summary": "Data arranged as a hierarchy: one root, branching down to children.",
+      "levels": {
+        "intro": "A tree organises things in levels, like a family tree upside down. One root at the top, each item has children below it, and items with no children are leaves.",
+        "core": "Every node in a tree has exactly one parent, except the root, which has none. There are no loops, so there is exactly one path from the root to any node. The depth of a node is how many steps it is from the root; the height of the tree is the deepest depth. In a binary tree each node has at most two children, left and right. Trees are built with pointers: each node points to its children.",
+        "deep": "Trees appear wherever there's hierarchy: folders on a disk, the structure of a web page (the DOM), and the syntax tree a compiler builds from code. A balanced binary tree with n nodes has height about log₂ n, which is why tree operations can be very fast. Traversals visit every node in a fixed order: pre-order (parent first), in-order (left, parent, right, which lists a search tree in sorted order) and post-order (children first, used to free or evaluate)."
+      },
+      "analogy": "Folders inside folders on your computer.",
+      "realWorld": ["Files and folders", "The structure of every web page", "Company org charts"],
+      "sources": [{"title": "Tree (data structure) — Wikipedia", "url": "https://en.wikipedia.org/wiki/Tree_(data_structure)"}],
+      "requires": ["linked-list"],
+      "diagram": {
+        "nodes": [
+          {"id": "root", "label": "Documents", "x": 0.5, "y": 0.12},
+          {"id": "a", "label": "Photos", "x": 0.25, "y": 0.45},
+          {"id": "b", "label": "Work", "x": 0.75, "y": 0.45},
+          {"id": "a1", "label": "beach.jpg", "x": 0.12, "y": 0.8, "role": "pill"},
+          {"id": "a2", "label": "cat.jpg", "x": 0.37, "y": 0.8, "role": "pill"},
+          {"id": "b1", "label": "plan.pdf", "x": 0.75, "y": 0.8, "role": "pill"},
+          {"id": "rootnote", "label": "root: no parent", "x": 0.83, "y": 0.12, "role": "note"},
+          {"id": "leafnote", "label": "leaves: no children", "x": 0.5, "y": 0.95, "role": "note"}
+        ],
+        "edges": [
+          {"from": "root", "to": "a"},
+          {"from": "root", "to": "b"},
+          {"from": "a", "to": "a1"},
+          {"from": "a", "to": "a2"},
+          {"from": "b", "to": "b1"}
+        ],
+        "steps": [
+          {"caption": "The root sits at the top. It is the only node with no parent.", "show": ["root", "rootnote"]},
+          {"caption": "It has two children: Photos and Work.", "show": ["root>a", "root>b"]},
+          {"caption": "Each child can have its own children.", "show": ["a>a1", "a>a2", "b>b1"]},
+          {"caption": "Nodes at the bottom with no children are leaves. From the root there's exactly one path to each.", "show": ["leafnote"]}
+        ]
+      }
+    },
+    {
+      "id": "binary-search-tree",
+      "title": "Binary search tree",
+      "cluster": "data",
+      "aliases": ["bst", "balanced tree", "red-black tree", "avl"],
+      "summary": "A tree kept in order: smaller values to the left, larger to the right.",
+      "levels": {
+        "intro": "A binary search tree keeps items sorted. At every node, smaller values go left and larger values go right, so finding something is a series of left-or-right choices.",
+        "core": "To find a value, start at the root: if it's smaller, go left; if larger, go right; repeat until you find it or hit an empty spot. Inserting follows the same path and puts the new value in the empty spot where the search ended. Each comparison discards a whole subtree, just like binary search discards half of an array. Reading the tree in-order (left, node, right) lists every value in sorted order.",
+        "deep": "Speed depends on shape. A balanced tree has height about log₂ n, so a million items need about 20 comparisons. But inserting already-sorted data into a plain BST makes a long chain, and everything degrades to O(n). Self-balancing trees (red-black, AVL) rotate nodes after inserts to keep the height logarithmic. Databases use B-trees, a wide, shallow variant with many keys per node, so each step reads one disk page."
+      },
+      "analogy": "A guessing game: 'Is it higher or lower?' at every step.",
+      "realWorld": ["Database indexes (as B-trees)", "Ordered maps in many standard libraries", "Autocomplete over sorted word lists"],
+      "sources": [
+        {"title": "Binary search tree — Wikipedia", "url": "https://en.wikipedia.org/wiki/Binary_search_tree"},
+        {"title": "Self-balancing binary search tree — Wikipedia", "url": "https://en.wikipedia.org/wiki/Self-balancing_binary_search_tree"}
+      ],
+      "requires": ["tree", "binary-search"],
+      "simulations": ["bstInsert"]
+    },
+    {
+      "id": "heap",
+      "title": "Heap",
+      "cluster": "data",
+      "aliases": ["priority queue", "min-heap", "max-heap", "binary heap"],
+      "summary": "A tree that always keeps the smallest (or largest) item at the top.",
+      "levels": {
+        "intro": "A heap is a structure that always knows its smallest item. You can add things in any order and always take out the smallest next. That makes it a priority queue.",
+        "core": "In a min-heap, every parent is smaller than or equal to its children, so the root holds the minimum. To add an item, place it at the next free spot on the bottom row, then swap it with its parent while it's smaller (sift up). To remove the minimum, take the root, move the last item to the top, and swap it down with its smaller child until order is restored (sift down). Both take O(log n), because the tree is always complete and so stays short.",
+        "deep": "A heap is a complete binary tree, filled level by level, so it fits neatly in an array with no pointers: the children of index i sit at 2i + 1 and 2i + 2, and its parent at (i − 1) / 2. Heaps power Dijkstra's shortest-path algorithm, operating system schedulers, merging many sorted lists, and heapsort. Building a heap from n items at once takes only O(n), surprisingly less than n separate inserts."
+      },
+      "analogy": "A hospital emergency room: the most urgent patient is always seen next, whoever arrived first.",
+      "realWorld": ["Shortest-path routing in maps", "Task schedulers picking the next job", "Finding the top 10 of a huge list"],
+      "sources": [
+        {"title": "Binary heap — Wikipedia", "url": "https://en.wikipedia.org/wiki/Binary_heap"},
+        {"title": "Priority queue — Wikipedia", "url": "https://en.wikipedia.org/wiki/Priority_queue"}
+      ],
+      "requires": ["tree", "array"],
+      "simulations": ["heapInsert"]
+    },
+    {
+      "id": "graph",
+      "title": "Graph",
+      "cluster": "data",
+      "aliases": ["graphs", "network", "vertex", "edge", "node", "adjacency list"],
+      "summary": "Things (nodes) and the connections between them (edges), with no fixed hierarchy.",
+      "levels": {
+        "intro": "A graph is dots joined by lines. The dots are things, like people or cities; the lines are connections, like friendships or roads. This app's map is a graph.",
+        "core": "A graph has nodes (also called vertices) and edges. Edges can be directed (one-way, like following someone) or undirected (two-way, like a friendship), and weighted (a road with a length) or unweighted. Unlike a tree, a graph can have cycles and many paths between the same two nodes. Computers usually store a graph as an adjacency list: for each node, a list of its neighbours.",
+        "deep": "Trees and linked lists are special cases of graphs. Many problems become easy once modelled as a graph: shortest routes, recommendations, dependency order (topological sorting of a directed acyclic graph, which this app uses to order prerequisites), and network reliability. An adjacency matrix, an n × n grid of yes/no, is the alternative to lists; it answers 'are these two connected?' instantly but uses n² space, wasteful for sparse graphs like road networks."
+      },
+      "analogy": "A subway map: stations joined by lines, with many ways to get around.",
+      "realWorld": ["Social networks", "Road maps and navigation", "This map of ideas and their prerequisites"],
+      "sources": [
+        {"title": "Graph (abstract data type) — Wikipedia", "url": "https://en.wikipedia.org/wiki/Graph_(abstract_data_type)"},
+        {"title": "Graph theory — Wikipedia", "url": "https://en.wikipedia.org/wiki/Graph_theory"}
+      ],
+      "requires": ["tree"],
+      "diagram": {
+        "nodes": [
+          {"id": "a", "label": "Ana", "x": 0.15, "y": 0.3, "role": "pill"},
+          {"id": "b", "label": "Ben", "x": 0.45, "y": 0.15, "role": "pill"},
+          {"id": "c", "label": "Cy", "x": 0.75, "y": 0.3, "role": "pill"},
+          {"id": "d", "label": "Dee", "x": 0.3, "y": 0.7, "role": "pill"},
+          {"id": "e", "label": "Eli", "x": 0.7, "y": 0.72, "role": "pill"},
+          {"id": "cycle", "label": "A loop: Ana → Ben → Dee → Ana. Trees can't do this.", "x": 0.5, "y": 0.93, "role": "note"},
+          {"id": "list", "label": "Stored as: Ana: Ben, Dee · Ben: Ana, Cy, Dee · …", "x": 0.5, "y": 0.47, "role": "note"}
+        ],
+        "edges": [
+          {"from": "a", "to": "b", "style": "line"},
+          {"from": "b", "to": "c", "style": "line"},
+          {"from": "a", "to": "d", "style": "line"},
+          {"from": "b", "to": "d", "style": "line"},
+          {"from": "c", "to": "e", "style": "line"}
+        ],
+        "steps": [
+          {"caption": "Five people. In a graph, these are nodes.", "show": ["a", "b", "c", "d", "e"]},
+          {"caption": "Friendships connect them. Each connection is an edge, here two-way.", "show": ["a>b", "b>c", "c>e", "a>d"]},
+          {"caption": "Add Ben–Dee and a loop appears. Unlike a tree, a graph allows loops and many routes.", "show": ["b>d", "cycle"]},
+          {"caption": "A computer stores each node's list of neighbours: an adjacency list.", "show": ["list"]}
+        ]
+      }
+    }
+  ]
+}

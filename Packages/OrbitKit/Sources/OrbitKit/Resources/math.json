@@ -1,0 +1,264 @@
+{
+  "cluster": {
+    "id": "math",
+    "name": "Math foundations",
+    "blurb": "The handful of math ideas that the rest of computing quietly leans on.",
+    "hue": "rose"
+  },
+  "topics": [
+    {
+      "id": "function",
+      "title": "Function",
+      "cluster": "math",
+      "aliases": ["mapping", "f(x)"],
+      "summary": "A rule that turns each input into exactly one output.",
+      "levels": {
+        "intro": "A function is a machine with one slot in and one slot out. Put in a number and the rule gives back exactly one answer. 'Double it' is a function: 3 goes in, 6 comes out.",
+        "core": "A function f maps every allowed input x (its domain) to exactly one output f(x). You can write it as a formula, like f(x) = 2x + 1, as a table, or as a graph, where each input sits on the horizontal axis and its output is the height of the curve above it. The 'exactly one output' rule is what makes functions predictable: the same input always gives the same result.",
+        "deep": "Functions compose: g(f(x)) feeds one rule's output into the next, which is how complicated behaviour is built from simple steps in math, in code, and in neural networks, which are long chains of simple functions. Functions can also take several inputs, like f(x, y) = x² + y², whose graph is a surface rather than a curve. Properties such as being continuous or smooth decide which tools apply; derivatives, for example, need smoothness."
+      },
+      "analogy": "A vending machine: press B4 and you always get the same snack.",
+      "realWorld": ["A spreadsheet formula turns cell values into a result", "A thermostat maps temperature to heater on or off", "Every function you write in code (ideally) behaves this way"],
+      "sources": [{"title": "Function (mathematics) — Wikipedia", "url": "https://en.wikipedia.org/wiki/Function_(mathematics)"}],
+      "diagram": {
+        "nodes": [
+          {"id": "in", "label": "Input\n3", "x": 0.13, "y": 0.45},
+          {"id": "f", "label": "f(x) = 2x + 1", "x": 0.5, "y": 0.45},
+          {"id": "out", "label": "Output\n7", "x": 0.87, "y": 0.45},
+          {"id": "rule", "label": "Same input, same output, every time", "x": 0.5, "y": 0.85, "role": "note"}
+        ],
+        "edges": [
+          {"from": "in", "to": "f"},
+          {"from": "f", "to": "out"}
+        ],
+        "steps": [
+          {"caption": "Start with an input: the number 3.", "show": ["in"]},
+          {"caption": "The input goes into the rule. This rule says: double it, then add 1.", "show": ["in>f"]},
+          {"caption": "Exactly one answer comes out: 2 × 3 + 1 = 7.", "show": ["f>out"]},
+          {"caption": "Put 3 in again tomorrow and you get 7 again. That reliability is what makes it a function.", "show": ["rule"]}
+        ]
+      }
+    },
+    {
+      "id": "vectors",
+      "title": "Vectors",
+      "cluster": "math",
+      "aliases": ["vector", "dot product"],
+      "summary": "A quantity with both size and direction, written as a list of numbers.",
+      "levels": {
+        "intro": "A vector is an arrow: it says how far and which way. 'Walk 3 steps east and 4 steps north' is the vector (3, 4).",
+        "core": "In 2D a vector is a pair (x, y); in 3D a triple; in general a list of n numbers. You add vectors tip to tail, adding their numbers position by position, and scale them by multiplying every number. The length of (3, 4) is √(3² + 4²) = 5. The dot product a·b = a₁b₁ + a₂b₂ + … measures how much two vectors point the same way: large and positive when aligned, zero when at right angles.",
+        "deep": "Vectors aren't limited to arrows in space. Any list of numbers you can add and scale is a vector: the red, green and blue values of a colour, a customer's purchase history, or the thousands of numbers a language model uses to represent a word. Once something is a vector, geometry applies: distance tells you how different two things are, and the angle between them, computed from the dot product, tells you how related they are. This is the bridge from geometry to machine learning."
+      },
+      "analogy": "Directions to a treasure: so many steps this way, so many steps that way.",
+      "realWorld": ["Game engines move characters with velocity vectors", "Search engines compare documents as vectors", "Phones combine accelerometer readings as vectors"],
+      "sources": [
+        {"title": "Euclidean vector — Wikipedia", "url": "https://en.wikipedia.org/wiki/Euclidean_vector"},
+        {"title": "Dot product — Wikipedia", "url": "https://en.wikipedia.org/wiki/Dot_product"}
+      ],
+      "diagram": {
+        "nodes": [
+          {"id": "o", "label": "start", "x": 0.12, "y": 0.85, "role": "dot"},
+          {"id": "a", "label": "", "x": 0.55, "y": 0.68, "role": "dot"},
+          {"id": "b", "label": "end", "x": 0.75, "y": 0.18, "role": "dot"},
+          {"id": "sum", "label": "a + b: add the numbers position by position", "x": 0.35, "y": 0.3, "role": "note"}
+        ],
+        "edges": [
+          {"from": "o", "to": "a", "label": "a = (4, 1)"},
+          {"from": "a", "to": "b", "label": "b = (2, 3)"},
+          {"from": "o", "to": "b", "label": "(6, 4)", "style": "dashed"}
+        ],
+        "steps": [
+          {"caption": "Vector a = (4, 1): four steps right, one step up, drawn as an arrow from the start.", "show": ["o>a"]},
+          {"caption": "Vector b = (2, 3) starts where a ends: tip to tail.", "show": ["a>b"]},
+          {"caption": "The dashed arrow goes straight from start to end. It is a + b = (4 + 2, 1 + 3) = (6, 4).", "show": ["o>b", "sum"]}
+        ]
+      }
+    },
+    {
+      "id": "matrices",
+      "title": "Matrices",
+      "cluster": "math",
+      "aliases": ["matrix", "matrix multiplication", "linear algebra"],
+      "summary": "A grid of numbers that transforms vectors: rotating, stretching or mixing them.",
+      "levels": {
+        "intro": "A matrix is a table of numbers. Its main job is to take a vector in and give a new vector out: stretched, rotated or mixed.",
+        "core": "Multiplying a matrix by a vector takes the dot product of each matrix row with the vector, giving one output number per row. A 2×2 matrix can rotate, scale, flip or shear every point of a plane at once. Multiplying two matrices combines their transformations: first one, then the other. The columns of a matrix tell you where the basic unit arrows (1, 0) and (0, 1) land after the transformation.",
+        "deep": "Matrices are how computers do lots of arithmetic in one structured step. Graphics chips multiply millions of points by 4×4 matrices every frame to position and project 3D scenes. A neural network layer is a matrix multiplication followed by a simple nonlinear function, so training a model is largely the work of adjusting matrix entries. Order matters: rotating then stretching generally gives a different result from stretching then rotating."
+      },
+      "analogy": "A recipe card saying how much of each input ingredient goes into each output dish.",
+      "realWorld": ["This app's 3D map turns every dot using rotation formulas that form a matrix", "Photo filters mix colour channels with a 3×3 matrix", "Every layer of a neural network is a matrix multiplication"],
+      "sources": [
+        {"title": "Matrix (mathematics) — Wikipedia", "url": "https://en.wikipedia.org/wiki/Matrix_(mathematics)"},
+        {"title": "Matrix multiplication — Wikipedia", "url": "https://en.wikipedia.org/wiki/Matrix_multiplication"}
+      ],
+      "diagram": {
+        "nodes": [
+          {"id": "vin", "label": "Vector in\n(1, 2)", "x": 0.13, "y": 0.5},
+          {"id": "m", "label": "Matrix\nrow 1: 2  0\nrow 2: 0  3", "x": 0.5, "y": 0.5},
+          {"id": "vout", "label": "Vector out\n(2, 6)", "x": 0.87, "y": 0.5},
+          {"id": "r1", "label": "row 1 · (1, 2) = 2×1 + 0×2 = 2", "x": 0.5, "y": 0.13, "role": "note"},
+          {"id": "r2", "label": "row 2 · (1, 2) = 0×1 + 3×2 = 6", "x": 0.5, "y": 0.87, "role": "note"}
+        ],
+        "edges": [
+          {"from": "vin", "to": "m"},
+          {"from": "m", "to": "vout"}
+        ],
+        "steps": [
+          {"caption": "Start with a vector: (1, 2).", "show": ["vin"]},
+          {"caption": "Feed it into a matrix with two rows.", "show": ["vin>m"]},
+          {"caption": "Row 1 combined with the vector gives the first output number: 2.", "show": ["r1"]},
+          {"caption": "Row 2 gives the second: 6.", "show": ["r2"]},
+          {"caption": "Out comes (2, 6): the vector stretched 2× sideways and 3× upward. This matrix does that to every vector.", "show": ["m>vout"]}
+        ]
+      }
+    },
+    {
+      "id": "derivative",
+      "title": "Derivative",
+      "cluster": "math",
+      "aliases": ["slope", "rate of change", "calculus", "chain rule", "gradient"],
+      "summary": "How fast something is changing at one exact moment: the slope of a curve at a point.",
+      "levels": {
+        "intro": "A derivative measures change. Your car's speedometer shows one: how fast your position is changing right now.",
+        "core": "For a function f, the derivative f′(x) is the slope of its graph at x. You get it by measuring the slope between two nearby points, (f(x + h) − f(x)) / h, and letting the gap h shrink toward zero; the line through two points turns into the tangent line touching just one. A positive slope means rising, negative means falling, and zero marks a flat spot, often a peak or a valley. For f(x) = x², the derivative is 2x.",
+        "deep": "Derivatives follow rules that make them mechanical to compute. The chain rule says the derivative of f(g(x)) is f′(g(x)) · g′(x): rates of change multiply along a chain of functions. Backpropagation in neural networks is the chain rule applied systematically through millions of composed functions. With several inputs you get one partial derivative per input, and together they form the gradient, a vector pointing in the direction of steepest increase."
+      },
+      "analogy": "The steepness of a hiking trail exactly under your boots.",
+      "realWorld": ["Speed is the derivative of position; acceleration is the derivative of speed", "Training any neural network uses derivatives", "Economists price with marginal cost, a derivative"],
+      "requires": ["function"],
+      "sources": [
+        {"title": "Derivative — Wikipedia", "url": "https://en.wikipedia.org/wiki/Derivative"},
+        {"title": "Chain rule — Wikipedia", "url": "https://en.wikipedia.org/wiki/Chain_rule"}
+      ],
+      "simulations": ["secantTangent"]
+    },
+    {
+      "id": "logarithm",
+      "title": "Logarithm",
+      "cluster": "math",
+      "aliases": ["log", "log2", "exponent"],
+      "summary": "How many times you multiply (or halve) to get from one number to another.",
+      "levels": {
+        "intro": "A logarithm answers 'how many times?'. log₂ 8 = 3, because you double 1 three times to reach 8, or halve 8 three times to get back to 1.",
+        "core": "log_b(x) is the power you raise b to in order to get x: 10³ = 1,000, so log₁₀ 1,000 = 3. Logarithms grow very slowly: log₂ of a million is about 20, and of a billion about 30. That's why repeatedly halving a problem is so powerful: even huge inputs collapse in a few dozen steps. Logs also turn multiplication into addition: log(ab) = log a + log b.",
+        "deep": "In computer science 'log' usually means log₂, and it appears whenever work is cut in half at each step: binary search, balanced trees, the levels of merge sort, and the number of bits needed to write a number (about log₂ n). Changing the base only multiplies a logarithm by a constant, so Big-O notation simply writes O(log n). Logarithmic scales such as decibels, the Richter scale and pH compress enormous ranges into manageable numbers."
+      },
+      "analogy": "Counting how many times you can fold a sheet of paper in half.",
+      "realWorld": ["Binary search finds one name among a billion in about 30 steps", "Decibels measure loudness on a log scale", "The number of bits needed to store a number"],
+      "sources": [{"title": "Logarithm — Wikipedia", "url": "https://en.wikipedia.org/wiki/Logarithm"}],
+      "requires": ["function"],
+      "simulations": ["halving"]
+    },
+    {
+      "id": "probability",
+      "title": "Probability",
+      "cluster": "math",
+      "aliases": ["chance", "odds", "conditional probability", "expected value"],
+      "summary": "A number from 0 to 1 for how likely something is.",
+      "levels": {
+        "intro": "Probability measures how likely something is, from 0 (impossible) to 1 (certain). A fair coin lands heads with probability 0.5.",
+        "core": "When outcomes are equally likely, probability is favourable outcomes divided by all outcomes: rolling a 6 is 1/6. The probabilities of all possible outcomes add up to 1. For independent events you multiply: two heads in a row is 0.5 × 0.5 = 0.25. A conditional probability, P(A | B), is the chance of A once you know B happened, and it can be very different from P(B | A).",
+        "deep": "A probability distribution assigns a probability to every outcome; it can be a list (a die) or a curve (heights in a population). The expected value is the probability-weighted average outcome, the basis of insurance pricing and game strategy. Over many repetitions, observed frequencies settle close to the true probabilities, the law of large numbers. Language models are, at their core, machines that output a probability distribution over the next word."
+      },
+      "analogy": "A weather forecast's 'chance of rain', put on a scale from 0 to 1.",
+      "realWorld": ["Spam filters estimate how likely an email is spam", "Insurance prices are expected values", "Language models pick each next word from probabilities"],
+      "sources": [
+        {"title": "Probability — Wikipedia", "url": "https://en.wikipedia.org/wiki/Probability"},
+        {"title": "Conditional probability — Wikipedia", "url": "https://en.wikipedia.org/wiki/Conditional_probability"}
+      ]
+    },
+    {
+      "id": "bayes-theorem",
+      "title": "Bayes' theorem",
+      "cluster": "math",
+      "aliases": ["bayes", "bayesian", "base rate"],
+      "summary": "How to update a belief when new evidence arrives.",
+      "destination": true,
+      "levels": {
+        "intro": "Bayes' theorem tells you how much a piece of evidence should change your mind. It weighs the evidence against how common the thing was to begin with.",
+        "core": "P(A | B) = P(B | A) × P(A) / P(B). In words: the probability of A given evidence B equals how well A explains B, times how likely A was beforehand (the prior), divided by how likely B is overall. The classic surprise: if a disease affects 1% of people and a test catches 90% of cases but also flags 10% of healthy people, a positive result means only about an 8% chance of disease, because healthy people vastly outnumber sick ones.",
+        "deep": "Counting people instead of percentages makes Bayes intuitive: of 1,000 people, 10 are sick and 9 of them test positive; of the 990 healthy people, 10% (99) also test positive. So only 9 of the 108 positives are sick, about 8%. Ignoring the prior is called base-rate neglect, and even trained professionals fall for it. Bayesian updating is how classic spam filters, medical decision tools and many machine-learning methods combine prior knowledge with new data."
+      },
+      "analogy": "A detective weighing a clue against how many suspects could have left it.",
+      "realWorld": ["Interpreting medical test results", "Classic spam filters", "Search-and-rescue teams updating where to look"],
+      "sources": [
+        {"title": "Bayes' theorem — Wikipedia", "url": "https://en.wikipedia.org/wiki/Bayes%27_theorem"},
+        {"title": "Base rate fallacy — Wikipedia", "url": "https://en.wikipedia.org/wiki/Base_rate_fallacy"}
+      ],
+      "requires": ["probability"],
+      "diagram": {
+        "nodes": [
+          {"id": "all", "label": "1,000 people", "x": 0.5, "y": 0.08},
+          {"id": "sick", "label": "10 sick", "x": 0.25, "y": 0.38},
+          {"id": "well", "label": "990 healthy", "x": 0.75, "y": 0.38},
+          {"id": "sp", "label": "9 test +", "x": 0.13, "y": 0.7},
+          {"id": "sn", "label": "1 test −", "x": 0.37, "y": 0.7},
+          {"id": "wp", "label": "99 test +", "x": 0.63, "y": 0.7},
+          {"id": "wn", "label": "891 test −", "x": 0.87, "y": 0.7},
+          {"id": "result", "label": "Positives: 9 + 99 = 108. Sick among them: 9 ÷ 108 ≈ 8%", "x": 0.5, "y": 0.93, "role": "note"}
+        ],
+        "edges": [
+          {"from": "all", "to": "sick", "label": "1%"},
+          {"from": "all", "to": "well", "label": "99%"},
+          {"from": "sick", "to": "sp", "label": "90%"},
+          {"from": "sick", "to": "sn"},
+          {"from": "well", "to": "wp", "label": "10%"},
+          {"from": "well", "to": "wn"}
+        ],
+        "steps": [
+          {"caption": "Picture the test on 1,000 real people instead of percentages.", "show": ["all"]},
+          {"caption": "The disease is rare: 1% means 10 people are sick and 990 are healthy.", "show": ["all>sick", "all>well"]},
+          {"caption": "The test catches 90% of sick people: 9 of the 10 test positive.", "show": ["sick>sp", "sick>sn"]},
+          {"caption": "It also wrongly flags 10% of healthy people: that's 99 more positives.", "show": ["well>wp", "well>wn"]},
+          {"caption": "So a positive test puts you among 108 people, only 9 of whom are sick. The prior (rarity) dominates.", "show": ["result"]}
+        ]
+      }
+    },
+    {
+      "id": "modular-arithmetic",
+      "title": "Modular arithmetic",
+      "cluster": "math",
+      "aliases": ["mod", "modulo", "remainder", "clock arithmetic"],
+      "summary": "Arithmetic that wraps around, like hours on a clock.",
+      "levels": {
+        "intro": "Modular arithmetic is clock maths. On a 12-hour clock, 9 o'clock plus 5 hours is 2 o'clock, not 14.",
+        "core": "a mod n is the remainder after dividing a by n, so 14 mod 12 = 2 and 17 mod 5 = 2. Numbers that share a remainder are treated as equal, and addition and multiplication still work after wrapping: you can reduce at every step and get the same final remainder. Computers use this constantly: picking a slot in a hash table, cycling through a list, or checking whether a number is even (n mod 2 = 0).",
+        "deep": "Some operations are easy one way and hard to undo in modular arithmetic. Computing 7¹²³ mod 143 is quick with repeated squaring, but reversing that kind of calculation without a secret is infeasible when the numbers are hundreds of digits long. That asymmetry is the foundation of public-key cryptography such as RSA and Diffie–Hellman key exchange. Modular arithmetic also powers check digits like the last digit of an ISBN or a credit card number."
+      },
+      "analogy": "A running track: after one full lap you are back at the start line.",
+      "realWorld": ["Clock and calendar arithmetic", "Hash tables pick a slot with hash mod size", "RSA and other encryption"],
+      "sources": [{"title": "Modular arithmetic — Wikipedia", "url": "https://en.wikipedia.org/wiki/Modular_arithmetic"}],
+      "diagram": {
+        "nodes": [
+          {"id": "n0", "label": "0", "x": 0.5, "y": 0.1, "role": "dot"},
+          {"id": "n1", "label": "1", "x": 0.65, "y": 0.154, "role": "dot"},
+          {"id": "n2", "label": "2", "x": 0.76, "y": 0.3, "role": "dot"},
+          {"id": "n3", "label": "3", "x": 0.8, "y": 0.5, "role": "dot"},
+          {"id": "n4", "label": "4", "x": 0.76, "y": 0.7, "role": "dot"},
+          {"id": "n5", "label": "5", "x": 0.65, "y": 0.846, "role": "dot"},
+          {"id": "n6", "label": "6", "x": 0.5, "y": 0.9, "role": "dot"},
+          {"id": "n7", "label": "7", "x": 0.35, "y": 0.846, "role": "dot"},
+          {"id": "n8", "label": "8", "x": 0.24, "y": 0.7, "role": "dot"},
+          {"id": "n9", "label": "9", "x": 0.2, "y": 0.5, "role": "dot"},
+          {"id": "n10", "label": "10", "x": 0.24, "y": 0.3, "role": "dot"},
+          {"id": "n11", "label": "11", "x": 0.35, "y": 0.154, "role": "dot"},
+          {"id": "sum", "label": "9 + 5 = 14\n14 mod 12 = 2", "x": 0.5, "y": 0.5, "role": "note"}
+        ],
+        "edges": [
+          {"from": "n9", "to": "n10"},
+          {"from": "n10", "to": "n11"},
+          {"from": "n11", "to": "n0"},
+          {"from": "n0", "to": "n1"},
+          {"from": "n1", "to": "n2"}
+        ],
+        "steps": [
+          {"caption": "A clock for 'mod 12': the numbers 0 to 11 in a circle. Twelve is written as 0.", "show": ["n0", "n1", "n2", "n3", "n4", "n5", "n6", "n7", "n8", "n9", "n10", "n11"]},
+          {"caption": "Start at 9 and add 5 hours. The first three steps go 9 → 10 → 11 → 0. Passing the top wraps around.", "show": ["n9>n10", "n10>n11", "n11>n0"]},
+          {"caption": "Two more steps: 0 → 1 → 2. We land on 2.", "show": ["n0>n1", "n1>n2"]},
+          {"caption": "That's modular arithmetic: 9 + 5 = 14, and the remainder of 14 ÷ 12 is 2.", "show": ["sum"]}
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,191 @@
+{
+  "cluster": {
+    "id": "algorithms",
+    "name": "Algorithms",
+    "blurb": "Step-by-step methods for solving problems, and how to tell fast ones from slow ones.",
+    "hue": "orange"
+  },
+  "topics": [
+    {
+      "id": "big-o",
+      "title": "Big-O notation",
+      "cluster": "algorithms",
+      "aliases": ["complexity", "time complexity", "o(n)", "o(log n)", "efficiency", "growth rate"],
+      "summary": "A way to describe how an algorithm's work grows as its input gets bigger.",
+      "levels": {
+        "intro": "Big-O describes how much slower a method gets as the job gets bigger. O(n) means double the input, double the work. O(n²) means double the input, four times the work.",
+        "core": "Big-O ignores exact timings and constant factors and keeps only the growth pattern for large inputs. Common classes, from best to worst: O(1) constant, the same work regardless of size; O(log n), like binary search; O(n), touching each item once; O(n log n), good sorting; O(n²), comparing every pair; O(2ⁿ), trying every subset. For a million items, log n is about 20, n log n about 20 million, and n² a trillion.",
+        "deep": "Formally, f(n) is O(g(n)) if some constant multiple of g eventually stays above f; it's an upper bound. Big-Θ means a tight bound and Big-Ω a lower bound, though everyday usage says Big-O for all three. Analyses may describe the worst case, the average case, or the amortised cost over a sequence of operations. Constants still matter in practice: an O(n) algorithm with a huge constant can lose to an O(n log n) one for any realistic input."
+      },
+      "analogy": "Comparing how the time to search a library grows if the library doubled in size.",
+      "realWorld": ["Choosing a data structure for an app feature", "Explaining why a page got slow as users grew", "Coding interviews"],
+      "sources": [
+        {"title": "Big O notation — Wikipedia", "url": "https://en.wikipedia.org/wiki/Big_O_notation"},
+        {"title": "Time complexity — Wikipedia", "url": "https://en.wikipedia.org/wiki/Time_complexity"}
+      ],
+      "requires": ["logarithm"],
+      "simulations": ["growthCurves"]
+    },
+    {
+      "id": "binary-search",
+      "title": "Binary search",
+      "cluster": "algorithms",
+      "aliases": ["bisection", "half interval search"],
+      "summary": "Finding an item in a sorted list by repeatedly halving where it could be.",
+      "levels": {
+        "intro": "Binary search finds something in a sorted list by checking the middle. If what you want is bigger, throw away the left half; if smaller, the right half. Repeat until found.",
+        "core": "Keep two bounds, low and high, around the part of the list that could still contain the target. Check the middle item. If it matches, you're done. If the target is larger, move low just past the middle; if smaller, move high just before it. Each check halves the remaining range, so a list of n items needs at most about log₂ n checks: 20 for a million items, 30 for a billion. It only works if the list is sorted.",
+        "deep": "Binary search is famously easy to get subtly wrong: off-by-one bounds, infinite loops when low and high are adjacent, and computing the middle as (low + high) / 2, which can overflow for huge arrays; low + (high − low) / 2 avoids it. The same halving idea works on any yes/no question that flips once, such as finding the first version of code where a bug appears (git bisect) or the smallest setting that makes a test pass."
+      },
+      "analogy": "Finding a word in a paper dictionary by opening near the middle and narrowing down.",
+      "realWorld": ["Looking up a contact in a sorted list", "git bisect finding the commit that broke something", "Database index lookups"],
+      "sources": [{"title": "Binary search — Wikipedia", "url": "https://en.wikipedia.org/wiki/Binary_search"}],
+      "requires": ["array", "big-o"],
+      "simulations": ["binarySearch"]
+    },
+    {
+      "id": "sorting",
+      "title": "Sorting",
+      "cluster": "algorithms",
+      "aliases": ["sort", "insertion sort", "merge sort", "quicksort", "sorting algorithms"],
+      "summary": "Putting items in order, and the many methods for doing it efficiently.",
+      "levels": {
+        "intro": "Sorting puts things in order: numbers smallest to largest, names A to Z. Computers sort constantly, because sorted data is much faster to search.",
+        "core": "Insertion sort works like sorting playing cards in your hand: take each new card and slide it left past bigger cards until it fits. It's simple and fast for small or nearly sorted lists, but O(n²) in general. Merge sort splits the list in half, sorts each half, and merges the two sorted halves, giving O(n log n) every time. Quicksort picks a pivot, puts smaller items before it and larger after, then sorts each side; usually O(n log n) and very fast in practice.",
+        "deep": "Any sort that works only by comparing pairs of items needs at least about n log₂ n comparisons in the worst case, so O(n log n) is the best possible for comparison sorts. Counting and radix sorts beat that limit by exploiting the structure of keys, such as small integers. A stable sort keeps equal items in their original order, which matters when sorting by one column after another. Real libraries use hybrids: Python's and Swift's sorts are Timsort-style merge sorts that use insertion sort for short runs."
+      },
+      "analogy": "Arranging a hand of playing cards.",
+      "realWorld": ["Sorting emails by date", "Leaderboards", "Databases sort to answer ORDER BY queries"],
+      "sources": [
+        {"title": "Sorting algorithm — Wikipedia", "url": "https://en.wikipedia.org/wiki/Sorting_algorithm"},
+        {"title": "Insertion sort — Wikipedia", "url": "https://en.wikipedia.org/wiki/Insertion_sort"}
+      ],
+      "requires": ["array", "big-o"],
+      "simulations": ["insertionSort"]
+    },
+    {
+      "id": "call-stack",
+      "title": "Call stack",
+      "cluster": "algorithms",
+      "aliases": ["stack frame", "stack overflow", "function call", "return address"],
+      "summary": "How a running program remembers which function called which, and where to return.",
+      "levels": {
+        "intro": "When a function calls another function, the computer has to remember where to come back to. It keeps a stack of notes: the newest call on top, finished calls removed.",
+        "core": "Each call pushes a stack frame holding that call's local variables, its arguments and the return address: where to continue once it finishes. The function on top is the one currently running. When it returns, its frame is popped and the caller carries on exactly where it left off. A crash report's stack trace is a printout of the frames at that moment, read from top (where it crashed) to bottom (where the program started).",
+        "deep": "Each thread has its own call stack, usually a fixed region of memory of a few megabytes. Recursion that never reaches its base case keeps pushing frames until that region runs out: a stack overflow. Because frames are pushed and popped in strict order, stack memory is cheap to allocate, unlike heap memory (no relation to the heap data structure), which holds data that must outlive the function that made it."
+      },
+      "analogy": "Bookmarks in a stack of books you are reading: finish the top one, and its bookmark tells you where to resume the one below.",
+      "realWorld": ["Crash reports and stack traces", "Debuggers showing the call stack", "Stack overflow errors in infinite recursion"],
+      "sources": [{"title": "Call stack — Wikipedia", "url": "https://en.wikipedia.org/wiki/Call_stack"}],
+      "requires": ["stack"],
+      "simulations": ["factorialStack"]
+    },
+    {
+      "id": "recursion",
+      "title": "Recursion",
+      "cluster": "algorithms",
+      "aliases": ["recursive", "base case", "divide and conquer"],
+      "summary": "Solving a problem by solving a smaller copy of the same problem.",
+      "levels": {
+        "intro": "Recursion means a function solves a problem by calling itself on a smaller piece of it, until the piece is so small the answer is obvious.",
+        "core": "Every recursive function needs two parts. The base case is the smallest version, answered directly: 1! = 1. The recursive case shrinks the problem and calls itself: n! = n × (n − 1)!. Each call waits on the call stack until the smaller one returns, then finishes its own work. Without a reachable base case the calls never stop and the stack overflows. Recursion fits naturally anything that's self-similar: trees, folders inside folders, nested brackets.",
+        "deep": "Divide-and-conquer algorithms like merge sort and quicksort are recursive: split, solve the parts, combine. Any recursion can be rewritten as a loop with an explicit stack, and some languages optimise tail calls so that recursion uses no extra stack. Naive recursion can repeat enormous amounts of work, as with Fibonacci where fib(n − 1) and fib(n − 2) recompute the same values; caching those results is the step that turns it into dynamic programming."
+      },
+      "analogy": "Russian nesting dolls: open one to find a smaller one, until the smallest is solid.",
+      "realWorld": ["Walking every folder on a disk", "Parsing nested data like JSON", "Fractal patterns"],
+      "sources": [{"title": "Recursion (computer science) — Wikipedia", "url": "https://en.wikipedia.org/wiki/Recursion_(computer_science)"}],
+      "requires": ["call-stack"],
+      "simulations": ["factorialStack"]
+    },
+    {
+      "id": "dynamic-programming",
+      "title": "Dynamic programming",
+      "cluster": "algorithms",
+      "aliases": ["memoization", "memoisation", "dp", "tabulation"],
+      "summary": "Solving each small subproblem once, saving the answer, and building up from there.",
+      "destination": true,
+      "levels": {
+        "intro": "Dynamic programming means never solving the same small problem twice. Write each answer down the first time, then reuse it.",
+        "core": "Some recursive problems keep meeting the same subproblems. Naive Fibonacci computes fib(3) again and again, so fib(10) makes 177 calls. Dynamic programming stores each answer: either by memoising (cache results inside the recursion) or by tabulating (fill a table from the smallest case upward: fib(0), fib(1), fib(2) …). Each value is then computed once, so fib(n) takes n steps instead of an exponential number.",
+        "deep": "DP applies when a problem has overlapping subproblems and optimal substructure: the best answer is built from best answers to smaller pieces. Classic examples are shortest paths, the edit distance between two words (used by spell checkers and DNA alignment), the knapsack problem, and longest common subsequence (the basis of diff tools). The hard part is choosing what a subproblem is; once the table's meaning is clear, the code is usually short."
+      },
+      "analogy": "Writing intermediate results on a notepad instead of recalculating them every time.",
+      "realWorld": ["Spell-check suggestions via edit distance", "diff tools comparing files", "Route planning"],
+      "sources": [
+        {"title": "Dynamic programming — Wikipedia", "url": "https://en.wikipedia.org/wiki/Dynamic_programming"},
+        {"title": "Memoization — Wikipedia", "url": "https://en.wikipedia.org/wiki/Memoization"}
+      ],
+      "requires": ["recursion"],
+      "simulations": ["fibTable"],
+      "diagram": {
+        "nodes": [
+          {"id": "f5", "label": "fib 5", "x": 0.5, "y": 0.1, "role": "pill"},
+          {"id": "f4", "label": "fib 4", "x": 0.28, "y": 0.35, "role": "pill"},
+          {"id": "f3a", "label": "fib 3", "x": 0.75, "y": 0.35, "role": "pill"},
+          {"id": "f3b", "label": "fib 3", "x": 0.15, "y": 0.62, "role": "pill"},
+          {"id": "f2a", "label": "fib 2", "x": 0.4, "y": 0.62, "role": "pill"},
+          {"id": "f2b", "label": "fib 2", "x": 0.63, "y": 0.62, "role": "pill"},
+          {"id": "f1", "label": "fib 1", "x": 0.87, "y": 0.62, "role": "pill"},
+          {"id": "dup", "label": "fib 3 is computed twice, fib 2 three times. It gets far worse as n grows.", "x": 0.5, "y": 0.83, "role": "note"},
+          {"id": "table", "label": "Table: 0 · 1 · 1 · 2 · 3 · 5  — each value computed once", "x": 0.5, "y": 0.95, "role": "note"}
+        ],
+        "edges": [
+          {"from": "f5", "to": "f4"},
+          {"from": "f5", "to": "f3a"},
+          {"from": "f4", "to": "f3b"},
+          {"from": "f4", "to": "f2a"},
+          {"from": "f3a", "to": "f2b"},
+          {"from": "f3a", "to": "f1"}
+        ],
+        "steps": [
+          {"caption": "fib 5 is defined as fib 4 + fib 3.", "show": ["f5>f4", "f5>f3a"]},
+          {"caption": "fib 4 in turn needs fib 3 and fib 2.", "show": ["f4>f3b", "f4>f2a"]},
+          {"caption": "And the other fib 3 needs fib 2 and fib 1.", "show": ["f3a>f2b", "f3a>f1"]},
+          {"caption": "The same subproblems keep reappearing. Plain recursion recomputes every one.", "show": ["dup"]},
+          {"caption": "Dynamic programming fills a table from the bottom up instead, computing each value once.", "show": ["table"]}
+        ]
+      }
+    },
+    {
+      "id": "bfs-dfs",
+      "title": "Graph search (BFS and DFS)",
+      "cluster": "algorithms",
+      "aliases": ["bfs", "dfs", "breadth-first search", "depth-first search", "traversal"],
+      "summary": "Two systematic ways to visit every node of a graph: level by level, or one path at a time.",
+      "levels": {
+        "intro": "To explore a network, you can go level by level, visiting all neighbours first (breadth-first), or follow one path as deep as it goes before backing up (depth-first).",
+        "core": "Both start at one node and keep a set of visited nodes so they never loop forever. Breadth-first search (BFS) keeps a queue: take the oldest node, visit its unvisited neighbours, and add them to the back. That explores in rings of increasing distance, so BFS finds the path with the fewest edges. Depth-first search (DFS) uses a stack, or recursion: always go to an unvisited neighbour of the newest node, and backtrack when stuck.",
+        "deep": "Both visit every reachable node and edge once, O(V + E). BFS's ring-by-ring order makes it the tool for shortest paths in unweighted graphs and 'degrees of separation'. DFS's backtracking makes it the tool for detecting cycles, topological sorting (ordering tasks after their prerequisites, as this app does), finding connected components, and solving mazes and puzzles. For weighted edges, BFS generalises to Dijkstra's algorithm, which swaps the queue for a priority queue."
+      },
+      "analogy": "BFS is ripples spreading on a pond; DFS is exploring a maze by keeping one hand on the wall.",
+      "realWorld": ["Friend suggestions within two connections", "Web crawlers", "Solving mazes and puzzles"],
+      "sources": [
+        {"title": "Breadth-first search — Wikipedia", "url": "https://en.wikipedia.org/wiki/Breadth-first_search"},
+        {"title": "Depth-first search — Wikipedia", "url": "https://en.wikipedia.org/wiki/Depth-first_search"}
+      ],
+      "requires": ["graph", "queue", "stack"],
+      "simulations": ["bfs", "dfs"]
+    },
+    {
+      "id": "dijkstra",
+      "title": "Dijkstra's shortest path",
+      "cluster": "algorithms",
+      "aliases": ["shortest path", "dijkstra", "routing", "navigation"],
+      "summary": "Finding the cheapest route through a network whose connections have costs.",
+      "destination": true,
+      "levels": {
+        "intro": "Dijkstra's algorithm finds the shortest route on a map where roads have lengths. It grows outward from the start, always settling the closest unsettled place next.",
+        "core": "Give the start a distance of 0 and every other node infinity. Repeatedly pick the unsettled node with the smallest known distance and settle it: its distance is now final. Then check each of its roads: if going through it gives a neighbour a shorter distance than known, update that neighbour (called relaxing the edge). When the destination is settled, follow the recorded 'came from' links backward to read off the route.",
+        "deep": "A heap (priority queue) makes 'pick the smallest' fast, giving O((V + E) log V). Dijkstra requires that no edge has a negative cost; with negative costs, Bellman–Ford is used instead. Real navigation apps add a heuristic that prefers nodes in the direction of the goal (A* search) and precompute shortcuts across the road network, so continent-scale routes return in milliseconds. Internet routers use the same algorithm in link-state routing protocols such as OSPF."
+      },
+      "analogy": "Water poured at the start flowing through pipes of different lengths: it reaches each junction first by the shortest route.",
+      "realWorld": ["Navigation apps", "Internet routing (OSPF)", "Game characters finding paths"],
+      "sources": [
+        {"title": "Dijkstra's algorithm — Wikipedia", "url": "https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm"},
+        {"title": "A* search algorithm — Wikipedia", "url": "https://en.wikipedia.org/wiki/A*_search_algorithm"}
+      ],
+      "requires": ["bfs-dfs", "heap"],
+      "simulations": ["dijkstra"]
+    }
+  ]
+}

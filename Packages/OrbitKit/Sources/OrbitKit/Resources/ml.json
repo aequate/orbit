@@ -1,0 +1,317 @@
+{
+  "cluster": {
+    "id": "ml",
+    "name": "Machine learning",
+    "blurb": "How computers learn patterns from examples, up to today's language models.",
+    "hue": "teal"
+  },
+  "topics": [
+    {
+      "id": "gradient-descent",
+      "title": "Gradient descent",
+      "cluster": "ml",
+      "aliases": ["optimisation", "optimization", "learning rate", "loss", "training"],
+      "summary": "Improving something step by step by always moving downhill on its error.",
+      "levels": {
+        "intro": "Gradient descent is how most AI learns. Measure how wrong you are, work out which small change would make you less wrong, make that change, and repeat thousands of times.",
+        "core": "Training defines a loss: a number measuring how badly the model does on examples. The derivative (with many parameters, the gradient) says which direction each parameter should move to make the loss go up, so you step the opposite way: new value = old value − learning rate × slope. Repeat. Near a minimum the slope flattens, so the steps shrink by themselves. The learning rate is crucial: too small and training crawls; too large and each step overshoots and can bounce or blow up.",
+        "deep": "Real training uses stochastic gradient descent: each step estimates the gradient from a small random batch of examples rather than the whole dataset, which is far cheaper and noisy in a way that often helps. Variants such as momentum and Adam smooth the steps and adapt the rate per parameter. Loss landscapes of large networks have billions of dimensions; there is no guarantee of finding the best possible minimum, but in practice the ones found work remarkably well."
+      },
+      "analogy": "Walking down a hill in fog: feel which way the ground slopes under your feet, take a step that way, repeat.",
+      "realWorld": ["Training every modern neural network", "Fitting a line to data", "Tuning recommendation systems"],
+      "sources": [
+        {"title": "Gradient descent — Wikipedia", "url": "https://en.wikipedia.org/wiki/Gradient_descent"},
+        {"title": "Stochastic gradient descent — Wikipedia", "url": "https://en.wikipedia.org/wiki/Stochastic_gradient_descent"}
+      ],
+      "requires": ["derivative"],
+      "simulations": ["gradientDescent", "gradientOvershoot"],
+      "diagram": {
+        "nodes": [
+          {"id": "params", "label": "Parameters\n(current guess)", "x": 0.18, "y": 0.2},
+          {"id": "loss", "label": "Loss\nhow wrong?", "x": 0.82, "y": 0.2},
+          {"id": "grad", "label": "Gradient\nwhich way is uphill?", "x": 0.82, "y": 0.75},
+          {"id": "step", "label": "Step\nmove a little downhill", "x": 0.18, "y": 0.75},
+          {"id": "rate", "label": "Step size = learning rate × slope", "x": 0.5, "y": 0.95, "role": "note"}
+        ],
+        "edges": [
+          {"from": "params", "to": "loss", "label": "try on examples"},
+          {"from": "loss", "to": "grad", "label": "derivative"},
+          {"from": "grad", "to": "step", "label": "go opposite"},
+          {"from": "step", "to": "params", "label": "update"}
+        ],
+        "steps": [
+          {"caption": "Start with a guess for the model's parameters, often random.", "show": ["params"]},
+          {"caption": "Run the model on examples and measure the loss: one number for how wrong it is.", "show": ["params>loss"]},
+          {"caption": "Take the derivative of the loss: for each parameter, which direction would increase the error.", "show": ["loss>grad"]},
+          {"caption": "Move each parameter a small step the opposite way.", "show": ["grad>step", "rate"]},
+          {"caption": "That's the new guess. Repeat the loop until the loss stops falling.", "show": ["step>params"]}
+        ]
+      }
+    },
+    {
+      "id": "neural-network",
+      "title": "Neural network",
+      "cluster": "ml",
+      "aliases": ["neural net", "deep learning", "neuron", "layer", "weights", "activation function"],
+      "summary": "Layers of simple weighted sums, tuned by training to turn inputs into useful outputs.",
+      "levels": {
+        "intro": "A neural network is a stack of layers of tiny calculators. Each one adds up its inputs, each multiplied by a weight, and passes the result on. Training adjusts the weights until the outputs are right.",
+        "core": "Each artificial neuron computes a weighted sum of its inputs plus a bias, then applies a simple nonlinear function, such as ReLU, which turns negatives into 0. A layer is many neurons side by side, which is exactly a matrix multiplication. Stacking layers lets early layers detect simple patterns and later ones combine them into complex ones: edges, then shapes, then faces. The weights start random and are learned by gradient descent.",
+        "deep": "Without the nonlinear step, any stack of layers would collapse into a single matrix: one linear function. With it, a network with enough neurons can approximate almost any function (the universal approximation theorem), though that says nothing about how easy it is to train. 'Deep learning' refers to networks with many layers. The basic recipe, trained by backpropagation, has existed since the 1980s; the recent leap came from far more data, GPUs, and better architectures."
+      },
+      "analogy": "An assembly line of inspectors, each giving a weighted vote to the next row of inspectors.",
+      "realWorld": ["Face ID", "Speech recognition", "Photo search by content"],
+      "sources": [
+        {"title": "Neural network (machine learning) — Wikipedia", "url": "https://en.wikipedia.org/wiki/Neural_network_(machine_learning)"},
+        {"title": "Universal approximation theorem — Wikipedia", "url": "https://en.wikipedia.org/wiki/Universal_approximation_theorem"}
+      ],
+      "requires": ["matrices", "gradient-descent"],
+      "diagram": {
+        "nodes": [
+          {"id": "x1", "label": "pixel 1", "x": 0.12, "y": 0.25, "role": "pill"},
+          {"id": "x2", "label": "pixel 2", "x": 0.12, "y": 0.5, "role": "pill"},
+          {"id": "x3", "label": "pixel 3", "x": 0.12, "y": 0.75, "role": "pill"},
+          {"id": "h1", "label": "", "x": 0.45, "y": 0.35, "role": "dot"},
+          {"id": "h2", "label": "", "x": 0.45, "y": 0.65, "role": "dot"},
+          {"id": "out", "label": "cat? 0.92", "x": 0.82, "y": 0.5, "role": "pill"},
+          {"id": "sum", "label": "Each dot: multiply inputs by weights, add up, drop negatives", "x": 0.45, "y": 0.08, "role": "note"},
+          {"id": "learn", "label": "Training adjusts every weight (every line)", "x": 0.5, "y": 0.93, "role": "note"}
+        ],
+        "edges": [
+          {"from": "x1", "to": "h1"},
+          {"from": "x2", "to": "h1"},
+          {"from": "x3", "to": "h1"},
+          {"from": "x1", "to": "h2"},
+          {"from": "x2", "to": "h2"},
+          {"from": "x3", "to": "h2"},
+          {"from": "h1", "to": "out"},
+          {"from": "h2", "to": "out"}
+        ],
+        "steps": [
+          {"caption": "Inputs on the left: numbers, here brightness values of pixels.", "show": ["x1", "x2", "x3"]},
+          {"caption": "Every input connects to the first hidden neuron. Each line carries a weight.", "show": ["x1>h1", "x2>h1", "x3>h1", "sum"]},
+          {"caption": "Each neuron in the layer does the same with its own weights.", "show": ["x1>h2", "x2>h2", "x3>h2"]},
+          {"caption": "The next layer combines those results into an output, here a score for 'cat'.", "show": ["h1>out", "h2>out"]},
+          {"caption": "Nothing here is programmed by hand. Training tunes the weights until outputs match examples.", "show": ["learn"]}
+        ]
+      }
+    },
+    {
+      "id": "backpropagation",
+      "title": "Backpropagation",
+      "cluster": "ml",
+      "aliases": ["backprop", "chain rule", "autodiff"],
+      "summary": "Working out how much each weight in a network contributed to the error, from the output backward.",
+      "levels": {
+        "intro": "After a network gets an answer wrong, backpropagation works backward from the error to figure out how much each weight was to blame, so each one can be nudged the right way.",
+        "core": "The forward pass runs inputs through the layers and computes the loss. The backward pass applies the chain rule layer by layer from the output back to the input: the gradient for each layer is computed from the gradient of the layer after it. In one backward sweep you get the slope of the loss with respect to every weight, which gradient descent then uses to update all of them at once.",
+        "deep": "Backpropagation is reverse-mode automatic differentiation: its cost is only a small constant multiple of the forward pass, no matter how many millions of weights there are. That efficiency is what makes training huge networks possible. Frameworks such as PyTorch and JAX record the operations of the forward pass and generate the backward pass automatically. In very deep networks, gradients can shrink or explode as they pass back through many layers; residual connections and normalisation layers help them flow."
+      },
+      "analogy": "After a failed relay race, replaying it backward to see how much time each runner lost.",
+      "realWorld": ["Every neural network training run", "PyTorch's loss.backward()", "Training image and language models"],
+      "sources": [
+        {"title": "Backpropagation — Wikipedia", "url": "https://en.wikipedia.org/wiki/Backpropagation"},
+        {"title": "Automatic differentiation — Wikipedia", "url": "https://en.wikipedia.org/wiki/Automatic_differentiation"}
+      ],
+      "requires": ["neural-network"],
+      "diagram": {
+        "nodes": [
+          {"id": "in", "label": "Input", "x": 0.1, "y": 0.35},
+          {"id": "l1", "label": "Layer 1", "x": 0.35, "y": 0.35},
+          {"id": "l2", "label": "Layer 2", "x": 0.6, "y": 0.35},
+          {"id": "loss", "label": "Loss\n0.8", "x": 0.87, "y": 0.35},
+          {"id": "g2", "label": "blame for layer 2", "x": 0.6, "y": 0.72, "role": "pill"},
+          {"id": "g1", "label": "blame for layer 1", "x": 0.35, "y": 0.72, "role": "pill"},
+          {"id": "chain", "label": "Each layer's blame is computed from the next layer's (chain rule)", "x": 0.5, "y": 0.93, "role": "note"}
+        ],
+        "edges": [
+          {"from": "in", "to": "l1"},
+          {"from": "l1", "to": "l2"},
+          {"from": "l2", "to": "loss"},
+          {"from": "loss", "to": "g2", "style": "dashed"},
+          {"from": "g2", "to": "g1", "style": "dashed"}
+        ],
+        "steps": [
+          {"caption": "Forward pass: the input flows through the layers.", "show": ["in>l1", "l1>l2"]},
+          {"caption": "The output is compared with the right answer, giving the loss.", "show": ["l2>loss"]},
+          {"caption": "Backward pass: from the loss, compute how much layer 2's weights contributed to the error.", "show": ["loss>g2"]},
+          {"caption": "Use layer 2's result to compute layer 1's share. One backward sweep covers every weight.", "show": ["g2>g1", "chain"]}
+        ]
+      }
+    },
+    {
+      "id": "embeddings",
+      "title": "Embeddings",
+      "cluster": "ml",
+      "aliases": ["embedding", "word vectors", "vector space", "semantic search", "cosine similarity"],
+      "summary": "Turning words or things into vectors, so that similar meanings end up close together.",
+      "levels": {
+        "intro": "An embedding turns a word, image or song into a list of numbers. The numbers are learned so that similar things get similar lists: 'cat' lands near 'kitten', far from 'carburettor'.",
+        "core": "Each item becomes a vector with hundreds or thousands of dimensions. Nobody hand-picks what each number means; the values are learned by training a network on a task such as predicting nearby words. Afterwards, distance and angle carry meaning: cosine similarity (based on the dot product) says how related two items are. Famously, directions can carry meaning too: king − man + woman lands near queen.",
+        "deep": "Embeddings make meaning computable. Semantic search embeds the documents and the query and returns the nearest vectors, matching meaning instead of exact words. Recommendation systems embed users and items in the same space. In a language model, the first layer looks up an embedding for each token, and every later layer refines those vectors using context. Embeddings also absorb the biases present in their training data, which can surface in applications."
+      },
+      "analogy": "Placing every word on a giant map where neighbours have related meanings.",
+      "realWorld": ["Searching photos by describing them", "'More like this' recommendations", "Finding related documents"],
+      "sources": [
+        {"title": "Word embedding — Wikipedia", "url": "https://en.wikipedia.org/wiki/Word_embedding"},
+        {"title": "Cosine similarity — Wikipedia", "url": "https://en.wikipedia.org/wiki/Cosine_similarity"}
+      ],
+      "requires": ["vectors", "neural-network"],
+      "diagram": {
+        "nodes": [
+          {"id": "cat", "label": "cat", "x": 0.2, "y": 0.25, "role": "dot"},
+          {"id": "kitten", "label": "kitten", "x": 0.3, "y": 0.35, "role": "dot"},
+          {"id": "dog", "label": "dog", "x": 0.15, "y": 0.5, "role": "dot"},
+          {"id": "car", "label": "car", "x": 0.8, "y": 0.7, "role": "dot"},
+          {"id": "truck", "label": "truck", "x": 0.88, "y": 0.58, "role": "dot"},
+          {"id": "near", "label": "Close: related meanings", "x": 0.3, "y": 0.1, "role": "note"},
+          {"id": "far", "label": "Far: unrelated", "x": 0.55, "y": 0.42, "role": "note"},
+          {"id": "how", "label": "Each word is really a list of hundreds of numbers; this shows two of them", "x": 0.5, "y": 0.93, "role": "note"}
+        ],
+        "edges": [
+          {"from": "cat", "to": "kitten", "style": "line"},
+          {"from": "kitten", "to": "car", "style": "dashed"}
+        ],
+        "steps": [
+          {"caption": "Each word becomes a point. Its position comes from its learned numbers.", "show": ["cat", "dog", "car", "how"]},
+          {"caption": "'cat' and 'kitten' end up close together.", "show": ["cat>kitten", "near"]},
+          {"caption": "'car' and 'truck' form their own neighbourhood.", "show": ["truck"]},
+          {"caption": "Unrelated words are far apart. Distance measures difference in meaning.", "show": ["kitten>car", "far"]}
+        ]
+      }
+    },
+    {
+      "id": "attention",
+      "title": "Attention",
+      "cluster": "ml",
+      "aliases": ["self-attention", "attention mechanism", "query key value", "context"],
+      "summary": "Letting each word decide which other words in the text matter to it, and blend in their meaning.",
+      "levels": {
+        "intro": "Attention lets a model, when working on one word, look back at all the other words and focus on the ones that matter. In 'the cat sat because it was tired', it helps 'it' focus on 'cat'.",
+        "core": "Each word's vector is turned into three new vectors: a query (what am I looking for?), a key (what do I contain?) and a value (what do I pass on?). A word's query is compared with every word's key by dot product, giving relevance scores; softmax turns the scores into weights that add up to 1. The word's new vector is the weighted average of all the values. So 'it' takes in a lot of 'cat' and little of 'because'.",
+        "deep": "Models run many attention heads in parallel, each learning a different kind of relationship: grammar, coreference, position. Because every word looks at every other word, cost grows with the square of the text length, which is why long context windows are expensive and why much research targets cheaper variants. In text generation, attention is masked so each word can only look at earlier words, never the future it is trying to predict."
+      },
+      "analogy": "Reading a sentence with a highlighter: for each word, you highlight the other words that explain it.",
+      "realWorld": ["Language models and chat assistants", "Machine translation", "Image models that attend over patches"],
+      "sources": [
+        {"title": "Attention (machine learning) — Wikipedia", "url": "https://en.wikipedia.org/wiki/Attention_(machine_learning)"},
+        {"title": "Attention Is All You Need (arXiv)", "url": "https://arxiv.org/abs/1706.03762"}
+      ],
+      "requires": ["embeddings"],
+      "diagram": {
+        "nodes": [
+          {"id": "w1", "label": "The", "x": 0.08, "y": 0.75, "role": "pill"},
+          {"id": "w2", "label": "cat", "x": 0.23, "y": 0.75, "role": "pill"},
+          {"id": "w3", "label": "sat", "x": 0.37, "y": 0.75, "role": "pill"},
+          {"id": "w4", "label": "because", "x": 0.53, "y": 0.75, "role": "pill"},
+          {"id": "w5", "label": "it", "x": 0.69, "y": 0.75, "role": "pill"},
+          {"id": "w6", "label": "was tired", "x": 0.87, "y": 0.75, "role": "pill"},
+          {"id": "q", "label": "'it' asks: who am I about?", "x": 0.69, "y": 0.2},
+          {"id": "res", "label": "'it' now carries the meaning of 'cat'", "x": 0.5, "y": 0.95, "role": "note"}
+        ],
+        "edges": [
+          {"from": "w5", "to": "q", "style": "line"},
+          {"from": "q", "to": "w2", "label": "0.81"},
+          {"from": "q", "to": "w3", "label": "0.06", "style": "dashed"},
+          {"from": "q", "to": "w4", "label": "0.03", "style": "dashed"}
+        ],
+        "steps": [
+          {"caption": "A sentence, one vector per word.", "show": ["w1", "w2", "w3", "w4", "w5", "w6"]},
+          {"caption": "Working on 'it', the model forms a query: what should 'it' pay attention to?", "show": ["w5>q"]},
+          {"caption": "The query is scored against every word. 'cat' scores highest.", "show": ["q>w2"]},
+          {"caption": "Other words get small weights. All the weights add up to 1.", "show": ["q>w3", "q>w4"]},
+          {"caption": "The new vector for 'it' is a weighted blend, mostly 'cat'.", "show": ["res"]}
+        ]
+      }
+    },
+    {
+      "id": "transformer",
+      "title": "Transformer",
+      "cluster": "ml",
+      "aliases": ["transformers", "gpt", "encoder", "decoder", "architecture"],
+      "summary": "The network design behind modern AI: layers of attention and small networks, stacked deep.",
+      "levels": {
+        "intro": "A transformer is the design inside today's AI language models. It reads all the words at once and, layer after layer, lets each word gather meaning from the others through attention.",
+        "core": "Text is split into tokens and each becomes an embedding, plus information about its position. Then a block repeats many times: an attention layer, where tokens exchange information, followed by a small feed-forward network applied to each token separately, which transforms what it gathered. Each block adds its result to its input (a residual connection), so information can flow through dozens of layers. At the end, each position's vector is turned into a prediction.",
+        "deep": "Introduced in 2017 in 'Attention Is All You Need', transformers replaced recurrent networks, which had to read text one word at a time. Because attention processes every position at once, training parallelises well on GPUs, and that is what made scaling to billions of parameters practical. The same architecture now handles images (cut into patches), audio, code and proteins. Most large language models use the decoder-only variant, predicting each next token from the ones before."
+      },
+      "analogy": "A committee meeting repeated many rounds: each round, every member listens to the others, then rethinks their own view.",
+      "realWorld": ["Chat assistants", "Translation services", "Code completion tools"],
+      "sources": [
+        {"title": "Transformer (deep learning architecture) — Wikipedia", "url": "https://en.wikipedia.org/wiki/Transformer_(deep_learning_architecture)"},
+        {"title": "Attention Is All You Need (arXiv)", "url": "https://arxiv.org/abs/1706.03762"}
+      ],
+      "requires": ["attention"],
+      "diagram": {
+        "nodes": [
+          {"id": "tok", "label": "Tokens: The · cat · sat", "x": 0.5, "y": 0.92},
+          {"id": "emb", "label": "Embeddings + positions", "x": 0.5, "y": 0.74},
+          {"id": "att", "label": "Attention: tokens share information", "x": 0.5, "y": 0.54},
+          {"id": "ff", "label": "Feed-forward: each token rethinks", "x": 0.5, "y": 0.36},
+          {"id": "repeat", "label": "× many layers", "x": 0.88, "y": 0.45, "role": "note"},
+          {"id": "outp", "label": "Prediction for each position", "x": 0.5, "y": 0.1}
+        ],
+        "edges": [
+          {"from": "tok", "to": "emb"},
+          {"from": "emb", "to": "att"},
+          {"from": "att", "to": "ff"},
+          {"from": "ff", "to": "outp"}
+        ],
+        "steps": [
+          {"caption": "Read from the bottom. Text is split into tokens.", "show": ["tok"]},
+          {"caption": "Each token becomes a vector, tagged with its position in the text.", "show": ["tok>emb"]},
+          {"caption": "Attention: every token gathers information from the others.", "show": ["emb>att"]},
+          {"caption": "A small network then processes each token's vector on its own.", "show": ["att>ff"]},
+          {"caption": "That pair of layers is repeated many times, refining every vector.", "show": ["repeat"]},
+          {"caption": "At the top, each position's vector is turned into a prediction.", "show": ["ff>outp"]}
+        ]
+      }
+    },
+    {
+      "id": "llm",
+      "title": "Large language model",
+      "cluster": "ml",
+      "aliases": ["llm", "chatbot", "language model", "gpt", "next token prediction", "ai"],
+      "summary": "A giant transformer trained to predict the next piece of text, which turns out to be enough to write, answer and reason.",
+      "destination": true,
+      "levels": {
+        "intro": "A large language model learns by reading enormous amounts of text and practising one thing: guessing the next word. Doing that well enough lets it answer questions, write and summarise.",
+        "core": "Text is split into tokens, word pieces of a few characters. The model, a transformer with billions of weights, outputs a probability for every possible next token. To generate, it picks one (usually among the likeliest), appends it, and repeats, one token at a time. Pre-training on huge text collections teaches language and facts; further training on examples and human feedback teaches it to follow instructions and be helpful.",
+        "deep": "Next-token prediction is a demanding objective: predicting text well requires modelling grammar, facts and the reasoning that produced the text. The model's knowledge is stored implicitly in its weights, so it can state false things fluently (hallucination); grounding it in provided sources, as Orbit does with its reference notes, reduces this. The temperature setting controls randomness when sampling. A context window limits how much text the model can attend to at once."
+      },
+      "analogy": "Extremely well-read autocomplete that has absorbed patterns of explanation, not just patterns of words.",
+      "realWorld": ["Chat assistants", "Writing and coding help", "Orbit's Ask feature, running on device"],
+      "sources": [
+        {"title": "Large language model — Wikipedia", "url": "https://en.wikipedia.org/wiki/Large_language_model"},
+        {"title": "Hallucination (artificial intelligence) — Wikipedia", "url": "https://en.wikipedia.org/wiki/Hallucination_(artificial_intelligence)"}
+      ],
+      "requires": ["transformer", "probability"],
+      "diagram": {
+        "nodes": [
+          {"id": "prompt", "label": "The sky is", "x": 0.15, "y": 0.45},
+          {"id": "model", "label": "Model", "x": 0.45, "y": 0.45},
+          {"id": "p1", "label": "blue  62%", "x": 0.8, "y": 0.2, "role": "pill"},
+          {"id": "p2", "label": "clear  18%", "x": 0.8, "y": 0.42, "role": "pill"},
+          {"id": "p3", "label": "falling  1%", "x": 0.8, "y": 0.64, "role": "pill"},
+          {"id": "next", "label": "The sky is blue", "x": 0.45, "y": 0.86},
+          {"id": "loop", "label": "Append the pick and predict again, token by token", "x": 0.45, "y": 0.08, "role": "note"}
+        ],
+        "edges": [
+          {"from": "prompt", "to": "model"},
+          {"from": "model", "to": "p1"},
+          {"from": "model", "to": "p2", "style": "dashed"},
+          {"from": "model", "to": "p3", "style": "dashed"},
+          {"from": "p1", "to": "next", "label": "pick"},
+          {"from": "next", "to": "model", "style": "dashed"}
+        ],
+        "steps": [
+          {"caption": "Start with some text.", "show": ["prompt"]},
+          {"caption": "The model reads all of it at once.", "show": ["prompt>model"]},
+          {"caption": "It outputs a probability for every possible next token.", "show": ["model>p1", "model>p2", "model>p3"]},
+          {"caption": "One token is chosen, usually a likely one, and added to the text.", "show": ["p1>next"]},
+          {"caption": "The longer text goes back in, and the loop repeats. That's all generation is.", "show": ["next>model", "loop"]}
+        ]
+      }
+    }
+  ]
+}

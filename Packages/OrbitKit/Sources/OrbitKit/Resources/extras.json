@@ -1,0 +1,166 @@
+{
+  "comparisons": [
+    {
+      "id": "stack-queue",
+      "left": {"name": "Stack", "topic": "stack"},
+      "right": {"name": "Queue", "topic": "queue"},
+      "rows": [
+        {"aspect": "Order out", "left": "Last in, first out", "right": "First in, first out"},
+        {"aspect": "Adds at", "left": "The top", "right": "The back"},
+        {"aspect": "Removes from", "left": "The top", "right": "The front"},
+        {"aspect": "Everyday picture", "left": "A pile of plates", "right": "A line at a shop"},
+        {"aspect": "Classic use", "left": "Undo, function calls, depth-first search", "right": "Print jobs, messages, breadth-first search"}
+      ],
+      "takeaway": "Same idea, a list you add to and take from, but a stack serves the newest item first and a queue the oldest."
+    },
+    {
+      "id": "array-linkedlist",
+      "left": {"name": "Array", "topic": "array"},
+      "right": {"name": "Linked list", "topic": "linked-list"},
+      "rows": [
+        {"aspect": "In memory", "left": "One continuous block", "right": "Nodes scattered, joined by pointers"},
+        {"aspect": "Get item n", "left": "Instant, O(1)", "right": "Walk n links, O(n)"},
+        {"aspect": "Insert in the middle", "left": "Shift everything after, O(n)", "right": "Rewire two pointers, O(1) once there"},
+        {"aspect": "Cache friendliness", "left": "Excellent", "right": "Poor"},
+        {"aspect": "Extra memory", "left": "Little", "right": "A pointer per item"}
+      ],
+      "takeaway": "Arrays win at reading by position and are usually faster in practice; linked lists win when you constantly insert and remove at known places."
+    },
+    {
+      "id": "tcp-udp",
+      "left": {"name": "TCP", "topic": "tcp"},
+      "right": {"name": "UDP", "topic": "udp"},
+      "rows": [
+        {"aspect": "Connection setup", "left": "Three-way handshake first", "right": "None, just send"},
+        {"aspect": "Lost data", "left": "Detected and resent", "right": "Gone"},
+        {"aspect": "Order", "left": "Always in order", "right": "Whatever order it arrives"},
+        {"aspect": "Delay", "left": "Higher, waits for missing pieces", "right": "Lowest possible"},
+        {"aspect": "Used by", "left": "Web pages, email, downloads", "right": "Games, calls, DNS, QUIC"}
+      ],
+      "takeaway": "TCP trades speed for completeness; UDP trades completeness for speed. Choose by whether late data is still useful."
+    },
+    {
+      "id": "bfs-vs-dfs",
+      "left": {"name": "Breadth-first", "topic": "bfs-dfs"},
+      "right": {"name": "Depth-first", "topic": "bfs-dfs"},
+      "rows": [
+        {"aspect": "Explores", "left": "Ring by ring, nearest first", "right": "One path as deep as it goes, then backtracks"},
+        {"aspect": "Remembers with", "left": "A queue", "right": "A stack, or recursion"},
+        {"aspect": "Finds fewest-step path", "left": "Yes", "right": "Not necessarily"},
+        {"aspect": "Memory use", "left": "Can be large on wide graphs", "right": "Proportional to path depth"},
+        {"aspect": "Good for", "left": "Shortest hops, degrees of separation", "right": "Cycles, ordering tasks, mazes"}
+      ],
+      "takeaway": "Both visit everything reachable; they differ only in order, and that order decides which questions each answers well."
+    },
+    {
+      "id": "process-thread",
+      "left": {"name": "Process", "topic": "process-thread"},
+      "right": {"name": "Thread", "topic": "process-thread"},
+      "rows": [
+        {"aspect": "Memory", "left": "Its own, private", "right": "Shared with its process's other threads"},
+        {"aspect": "If it crashes", "left": "Others keep running", "right": "Usually takes its whole process down"},
+        {"aspect": "Cost to create", "left": "Higher", "right": "Lower"},
+        {"aspect": "Talking to others", "left": "Through the OS: pipes, sockets, files", "right": "Directly, through shared memory"},
+        {"aspect": "Main risk", "left": "Overhead", "right": "Race conditions and deadlocks"}
+      ],
+      "takeaway": "Processes buy safety through isolation; threads buy speed through sharing."
+    },
+    {
+      "id": "hash-bst",
+      "left": {"name": "Hash table", "topic": "hash-table"},
+      "right": {"name": "Binary search tree", "topic": "binary-search-tree"},
+      "rows": [
+        {"aspect": "Find a key", "left": "O(1) on average", "right": "O(log n) when balanced"},
+        {"aspect": "Keeps keys sorted", "left": "No", "right": "Yes"},
+        {"aspect": "Range queries (all keys from A to F)", "left": "Slow, must check everything", "right": "Natural"},
+        {"aspect": "Worst case", "left": "O(n) with bad hashing", "right": "O(n) if unbalanced"},
+        {"aspect": "In Swift", "left": "Dictionary, Set", "right": "Not built in"}
+      ],
+      "takeaway": "If you only need 'find this exact key', use a hash table. If order matters, use a tree."
+    },
+    {
+      "id": "symmetric-public",
+      "left": {"name": "Shared-key encryption"},
+      "right": {"name": "Public-key encryption", "topic": "public-key-crypto"},
+      "rows": [
+        {"aspect": "Keys", "left": "One secret key, both sides hold it", "right": "A pair: public and private"},
+        {"aspect": "Key exchange", "left": "Must share the secret safely first", "right": "Publish the public key openly"},
+        {"aspect": "Speed", "left": "Very fast", "right": "Much slower"},
+        {"aspect": "Examples", "left": "AES, ChaCha20", "right": "RSA, elliptic curves"},
+        {"aspect": "Role in TLS", "left": "Encrypts all the actual data", "right": "Sets up the shared key and proves identity"}
+      ],
+      "takeaway": "Real systems use both: public-key crypto to agree on a secret safely, then fast shared-key crypto for everything else."
+    },
+    {
+      "id": "linear-binary",
+      "left": {"name": "Linear search"},
+      "right": {"name": "Binary search", "topic": "binary-search"},
+      "rows": [
+        {"aspect": "How", "left": "Check items one by one", "right": "Check the middle, discard half"},
+        {"aspect": "Needs sorted data", "left": "No", "right": "Yes"},
+        {"aspect": "Steps for 1,000 items", "left": "Up to 1,000", "right": "At most 10"},
+        {"aspect": "Steps for 1 billion", "left": "Up to 1 billion", "right": "About 30"},
+        {"aspect": "Growth", "left": "O(n)", "right": "O(log n)"}
+      ],
+      "takeaway": "Sorting once and then using binary search pays off whenever you search the same data many times."
+    },
+    {
+      "id": "recursion-iteration",
+      "left": {"name": "Recursion", "topic": "recursion"},
+      "right": {"name": "Iteration (loops)"},
+      "rows": [
+        {"aspect": "Repeats by", "left": "A function calling itself", "right": "A loop going round"},
+        {"aspect": "Stops at", "left": "The base case", "right": "The loop condition"},
+        {"aspect": "Memory", "left": "A stack frame per call", "right": "Constant"},
+        {"aspect": "Feels natural for", "left": "Trees, nesting, divide and conquer", "right": "Lists, counting, simple repetition"},
+        {"aspect": "Failure mode", "left": "Stack overflow", "right": "Infinite loop"}
+      ],
+      "takeaway": "Anything recursive can be written as a loop with your own stack; pick whichever makes the structure of the problem clearest."
+    },
+    {
+      "id": "compiler-interpreter",
+      "left": {"name": "Compiler", "topic": "compiler"},
+      "right": {"name": "Interpreter"},
+      "rows": [
+        {"aspect": "When translation happens", "left": "Before running, all at once", "right": "While running, step by step"},
+        {"aspect": "Output", "left": "A standalone executable", "right": "None, it runs the code directly"},
+        {"aspect": "Speed when running", "left": "Fast", "right": "Slower"},
+        {"aspect": "Errors found", "left": "Many before the program runs", "right": "Often only when that line runs"},
+        {"aspect": "Examples", "left": "Swift, C, Rust", "right": "Python (mostly), shell scripts"}
+      ],
+      "takeaway": "Compiling front-loads the work for speed and early error checking; interpreting gives a faster edit-and-run loop. Just-in-time compilers blend the two."
+    }
+  ],
+  "journeys": [
+    {
+      "id": "computers",
+      "title": "From switch to software",
+      "blurb": "How a pile of on/off switches ends up running apps.",
+      "topics": ["transistor", "binary", "logic-gates", "adder", "memory", "cpu", "instruction-cycle", "cache", "operating-system", "process-thread", "compiler"]
+    },
+    {
+      "id": "data",
+      "title": "Shapes of data",
+      "blurb": "The structures programs use to keep information quick to reach.",
+      "topics": ["memory", "array", "pointers", "linked-list", "stack", "queue", "modular-arithmetic", "hash-table", "tree", "heap", "graph"]
+    },
+    {
+      "id": "algorithms",
+      "title": "Thinking in algorithms",
+      "blurb": "Why some methods are fast, and the classic ideas behind them.",
+      "topics": ["function", "logarithm", "big-o", "binary-search", "sorting", "call-stack", "recursion", "dynamic-programming", "bfs-dfs", "dijkstra"]
+    },
+    {
+      "id": "internet",
+      "title": "How the internet works",
+      "blurb": "What happens between tapping a link and seeing a secure page.",
+      "topics": ["binary", "packets", "ip", "udp", "tcp", "dns", "http", "modular-arithmetic", "public-key-crypto", "tls"]
+    },
+    {
+      "id": "ml",
+      "title": "How AI learns",
+      "blurb": "From a slope on a graph to a large language model.",
+      "topics": ["function", "derivative", "gradient-descent", "vectors", "matrices", "neural-network", "backpropagation", "embeddings", "attention", "transformer", "probability", "llm"]
+    }
+  ]
+}

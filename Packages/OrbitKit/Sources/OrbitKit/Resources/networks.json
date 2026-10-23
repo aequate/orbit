@@ -1,0 +1,377 @@
+{
+  "cluster": {
+    "id": "networks",
+    "name": "The internet",
+    "blurb": "How data crosses the world in pieces, finds its way, and stays private.",
+    "hue": "violet"
+  },
+  "topics": [
+    {
+      "id": "packets",
+      "title": "Packets",
+      "cluster": "networks",
+      "aliases": ["packet switching", "packet", "router", "datagram"],
+      "summary": "Data sent across a network in small, separately addressed pieces.",
+      "levels": {
+        "intro": "The internet never sends a file in one piece. It chops it into small packets, each labelled with where it's going, sends them separately, and puts them back together at the other end.",
+        "core": "Each packet has a header (source address, destination address, sequence information) and a payload (a slice of the data, typically up to about 1,500 bytes). Routers along the way read only the header and forward each packet one hop closer to its destination. Packets from the same file may take different routes and arrive out of order; the receiving computer reassembles them. Many people's packets share the same cables at once, which makes the network efficient.",
+        "deep": "This design, packet switching, replaced the telephone network's circuit switching, where a call reserved a whole line end to end. Packet switching keeps working when parts of the network fail, because routers simply send packets another way, a property the internet's designers valued. The cost is unpredictability: packets can be delayed, duplicated, reordered or dropped when a router's queue is full, and higher layers like TCP have to cope with that."
+      },
+      "analogy": "Mailing a book as numbered postcards, each of which may travel by a different post van.",
+      "realWorld": ["Every web page, video and message travels as packets", "Video calls glitch when packets are lost", "Routers in homes and data centres forward packets"],
+      "sources": [
+        {"title": "Network packet — Wikipedia", "url": "https://en.wikipedia.org/wiki/Network_packet"},
+        {"title": "Packet switching — Wikipedia", "url": "https://en.wikipedia.org/wiki/Packet_switching"}
+      ],
+      "requires": ["binary"],
+      "diagram": {
+        "nodes": [
+          {"id": "file", "label": "Photo\n3 MB", "x": 0.1, "y": 0.5},
+          {"id": "p1", "label": "1/3", "x": 0.3, "y": 0.2, "role": "pill"},
+          {"id": "p2", "label": "2/3", "x": 0.3, "y": 0.5, "role": "pill"},
+          {"id": "p3", "label": "3/3", "x": 0.3, "y": 0.8, "role": "pill"},
+          {"id": "r1", "label": "Router", "x": 0.58, "y": 0.25, "role": "dot"},
+          {"id": "r2", "label": "Router", "x": 0.58, "y": 0.75, "role": "dot"},
+          {"id": "dest", "label": "Photo\nreassembled", "x": 0.9, "y": 0.5},
+          {"id": "hdr", "label": "Each piece carries a header: to, from, which piece", "x": 0.5, "y": 0.05, "role": "note"}
+        ],
+        "edges": [
+          {"from": "file", "to": "p1", "style": "line"},
+          {"from": "file", "to": "p2", "style": "line"},
+          {"from": "file", "to": "p3", "style": "line"},
+          {"from": "p1", "to": "r1"},
+          {"from": "p2", "to": "r2"},
+          {"from": "p3", "to": "r2"},
+          {"from": "r1", "to": "dest"},
+          {"from": "r2", "to": "dest"}
+        ],
+        "steps": [
+          {"caption": "A photo to send. It's too big to travel in one go.", "show": ["file"]},
+          {"caption": "It's chopped into numbered packets.", "show": ["file>p1", "file>p2", "file>p3"]},
+          {"caption": "Each packet gets a header saying where it's going and which piece it is.", "show": ["hdr"]},
+          {"caption": "Routers forward each packet independently. Packets from one photo can take different routes.", "show": ["p1>r1", "p2>r2", "p3>r2"]},
+          {"caption": "They may arrive in any order. The receiver uses the numbers to put the photo back together.", "show": ["r1>dest", "r2>dest"]}
+        ]
+      }
+    },
+    {
+      "id": "ip",
+      "title": "IP addresses",
+      "cluster": "networks",
+      "aliases": ["ip", "internet protocol", "ipv4", "ipv6", "routing", "nat"],
+      "summary": "The numeric addresses that let packets find any machine on the internet.",
+      "levels": {
+        "intro": "Every device on the internet has an IP address, a number like 203.0.113.5. Packets carry the destination address, and routers use it to pass each packet toward the right place.",
+        "core": "An IPv4 address is 32 bits, written as four numbers from 0 to 255. That allows only about 4.3 billion addresses, fewer than the world's devices, so home routers use NAT: all your devices share one public address, and the router keeps track of which conversation belongs to which device. IPv6 uses 128-bit addresses, like 2001:db8::1, enough for every device to have its own. IP delivers packets on a best-effort basis: no guarantee they arrive.",
+        "deep": "Routing is hierarchical. Addresses are handed out in blocks (prefixes such as 203.0.113.0/24), and each router keeps a table mapping prefixes to the next hop, always choosing the most specific match. Between the large networks that make up the internet, the Border Gateway Protocol (BGP) shares which network can reach which prefixes. Mistaken or malicious BGP announcements have occasionally sent huge amounts of traffic the wrong way."
+      },
+      "analogy": "A postal address, with each sorting office only needing to know which direction to send it next.",
+      "realWorld": ["Wi-Fi settings show your device's IP address", "Websites see your router's public IP", "IPv6 rollout on mobile networks"],
+      "sources": [
+        {"title": "IP address — Wikipedia", "url": "https://en.wikipedia.org/wiki/IP_address"},
+        {"title": "Network address translation — Wikipedia", "url": "https://en.wikipedia.org/wiki/Network_address_translation"}
+      ],
+      "requires": ["packets"],
+      "diagram": {
+        "nodes": [
+          {"id": "phone", "label": "Your phone\n192.168.1.20", "x": 0.13, "y": 0.5},
+          {"id": "home", "label": "Home router\npublic 203.0.113.5", "x": 0.4, "y": 0.5},
+          {"id": "isp", "label": "ISP router", "x": 0.62, "y": 0.22, "role": "dot"},
+          {"id": "core", "label": "Backbone router", "x": 0.62, "y": 0.78, "role": "dot"},
+          {"id": "server", "label": "Server\n198.51.100.7", "x": 0.87, "y": 0.5},
+          {"id": "nat", "label": "The router swaps your private address for its public one", "x": 0.35, "y": 0.88, "role": "note"},
+          {"id": "hop", "label": "Each router only knows the next hop", "x": 0.76, "y": 0.06, "role": "note"}
+        ],
+        "edges": [
+          {"from": "phone", "to": "home", "label": "to 198.51.100.7"},
+          {"from": "home", "to": "isp"},
+          {"from": "isp", "to": "core"},
+          {"from": "core", "to": "server"}
+        ],
+        "steps": [
+          {"caption": "Your phone has a private address on your home network: 192.168.1.20.", "show": ["phone"]},
+          {"caption": "It sends a packet addressed to the server's IP, 198.51.100.7, via your home router.", "show": ["phone>home"]},
+          {"caption": "Your router replaces your private address with the home's single public one (NAT), remembering who asked.", "show": ["nat"]},
+          {"caption": "Router after router passes the packet along, each choosing just the next hop toward that address.", "show": ["home>isp", "isp>core", "hop"]},
+          {"caption": "The packet arrives. The reply comes back to 203.0.113.5, and your router hands it to your phone.", "show": ["core>server"]}
+        ]
+      }
+    },
+    {
+      "id": "udp",
+      "title": "UDP",
+      "cluster": "networks",
+      "aliases": ["user datagram protocol", "datagram", "port"],
+      "summary": "A minimal way to send messages over IP: fast, but with no delivery guarantees.",
+      "levels": {
+        "intro": "UDP sends messages and doesn't check whether they arrive. That sounds careless, but it's fast, which is exactly what live games, calls and video need.",
+        "core": "UDP adds very little to IP: port numbers, so the message reaches the right app on the machine, and a checksum to detect corruption. There's no connection setup, no acknowledgement, no resending and no ordering. If a packet is lost, it's simply gone. For a voice call that's the right trade: a late audio packet is useless anyway, and waiting to resend it would make the whole call lag.",
+        "deep": "Apps that use UDP handle loss in their own way: games send the latest positions constantly so a missed update is soon replaced, and video calls hide gaps. DNS lookups use UDP because one question and one answer fit in single packets, and a lost one is just asked again. QUIC, the transport under HTTP/3, is built on UDP and re-implements reliability and encryption itself, so it can evolve faster than TCP, which lives inside operating systems."
+      },
+      "analogy": "Shouting across a noisy room: quick, but you won't know if every word got through.",
+      "realWorld": ["Online games", "Voice and video calls", "DNS lookups"],
+      "sources": [{"title": "User Datagram Protocol — Wikipedia", "url": "https://en.wikipedia.org/wiki/User_Datagram_Protocol"}],
+      "requires": ["ip"],
+      "diagram": {
+        "nodes": [
+          {"id": "a", "label": "Sender", "x": 0.12, "y": 0.5},
+          {"id": "b", "label": "Receiver", "x": 0.88, "y": 0.5},
+          {"id": "m1", "label": "msg 1", "x": 0.5, "y": 0.18, "role": "pill"},
+          {"id": "m2", "label": "msg 2  ✕ lost", "x": 0.5, "y": 0.5, "role": "pill"},
+          {"id": "m3", "label": "msg 3", "x": 0.5, "y": 0.82, "role": "pill"},
+          {"id": "none", "label": "No acknowledgements, no resending", "x": 0.5, "y": 0.96, "role": "note"}
+        ],
+        "edges": [
+          {"from": "a", "to": "m1", "style": "line"},
+          {"from": "m1", "to": "b"},
+          {"from": "a", "to": "m2", "style": "line"},
+          {"from": "a", "to": "m3", "style": "line"},
+          {"from": "m3", "to": "b"}
+        ],
+        "steps": [
+          {"caption": "A sender and a receiver. No connection is set up first.", "show": ["a", "b"]},
+          {"caption": "The sender fires message 1. It arrives.", "show": ["a>m1", "m1>b"]},
+          {"caption": "Message 2 is lost on the way. Nobody notices, and it isn't sent again.", "show": ["a>m2"]},
+          {"caption": "Message 3 arrives. The app gets 1 and 3 and must cope with the gap.", "show": ["a>m3", "m3>b", "none"]}
+        ]
+      }
+    },
+    {
+      "id": "tcp",
+      "title": "TCP",
+      "cluster": "networks",
+      "aliases": ["transmission control protocol", "handshake", "acknowledgement", "reliable delivery"],
+      "summary": "Turns unreliable packets into a reliable, ordered stream of data.",
+      "levels": {
+        "intro": "TCP makes sure everything you send arrives, complete and in order. It numbers the data, the receiver confirms what it got, and anything missing is sent again.",
+        "core": "A TCP connection starts with a three-way handshake: the client sends SYN, the server answers SYN-ACK, the client replies ACK. Then data flows as numbered bytes. The receiver sends back acknowledgements saying how much it has received in order. If an acknowledgement doesn't come back in time, the sender resends. The receiver puts out-of-order pieces back in sequence, so the app sees one clean stream.",
+        "deep": "TCP also controls speed. Flow control stops a fast sender from overwhelming a slow receiver, and congestion control probes how much the network can carry: the sender ramps its rate up until packets start getting lost, then backs off. One drawback is head-of-line blocking: a single lost packet holds up everything behind it, even data that already arrived. That limitation is one reason HTTP/3 moved to QUIC over UDP."
+      },
+      "analogy": "A phone call where both sides say 'got it' after each sentence and repeat anything that was missed.",
+      "realWorld": ["Loading web pages (HTTP/1 and HTTP/2)", "Email and file transfers", "Downloading apps"],
+      "sources": [
+        {"title": "Transmission Control Protocol — Wikipedia", "url": "https://en.wikipedia.org/wiki/Transmission_Control_Protocol"},
+        {"title": "TCP congestion control — Wikipedia", "url": "https://en.wikipedia.org/wiki/TCP_congestion_control"}
+      ],
+      "requires": ["ip"],
+      "diagram": {
+        "nodes": [
+          {"id": "client", "label": "Client", "x": 0.15, "y": 0.08},
+          {"id": "server", "label": "Server", "x": 0.85, "y": 0.08},
+          {"id": "cl", "label": "", "x": 0.15, "y": 0.97, "role": "anchor"},
+          {"id": "sl", "label": "", "x": 0.85, "y": 0.97, "role": "anchor"},
+          {"id": "c1", "label": "", "x": 0.15, "y": 0.22, "role": "anchor"},
+          {"id": "s1", "label": "", "x": 0.85, "y": 0.32, "role": "anchor"},
+          {"id": "s2", "label": "", "x": 0.85, "y": 0.4, "role": "anchor"},
+          {"id": "c2", "label": "", "x": 0.15, "y": 0.5, "role": "anchor"},
+          {"id": "c3", "label": "", "x": 0.15, "y": 0.58, "role": "anchor"},
+          {"id": "s3", "label": "", "x": 0.85, "y": 0.68, "role": "anchor"},
+          {"id": "c4", "label": "", "x": 0.15, "y": 0.76, "role": "anchor"},
+          {"id": "s4", "label": "", "x": 0.85, "y": 0.86, "role": "anchor"}
+        ],
+        "edges": [
+          {"from": "client", "to": "cl", "style": "line"},
+          {"from": "server", "to": "sl", "style": "line"},
+          {"from": "c1", "to": "s1", "label": "SYN: let's talk"},
+          {"from": "s2", "to": "c2", "label": "SYN-ACK: OK, ready"},
+          {"from": "c3", "to": "s3", "label": "ACK: connected"},
+          {"from": "c4", "to": "s4", "label": "data, bytes 1–1000"}
+        ],
+        "steps": [
+          {"caption": "Time runs downward. The client is on the left, the server on the right.", "show": ["client>cl", "server>sl"]},
+          {"caption": "The client asks to connect: SYN.", "show": ["c1>s1"]},
+          {"caption": "The server agrees and asks back: SYN-ACK.", "show": ["s2>c2"]},
+          {"caption": "The client confirms: ACK. Three messages, and both sides know the other is listening.", "show": ["c3>s3"]},
+          {"caption": "Now numbered data flows. The server acknowledges what it receives, and anything unacknowledged is sent again.", "show": ["c4>s4"]}
+        ]
+      }
+    },
+    {
+      "id": "dns",
+      "title": "DNS",
+      "cluster": "networks",
+      "aliases": ["domain name system", "domain", "resolver", "nameserver", "lookup"],
+      "summary": "The internet's phone book: turns names like example.com into IP addresses.",
+      "levels": {
+        "intro": "People remember names; networks route by numbers. DNS looks up a website's name and returns its IP address, so your device knows where to send packets.",
+        "core": "Your device asks a resolver, usually run by your internet provider or a public service, for the address. If the resolver doesn't already know, it asks step by step down a hierarchy: a root server says who handles .com, a .com server says who handles example.com, and example.com's own nameserver gives the address. The resolver hands the answer back and caches it for a set time (the TTL), so the next lookup is instant.",
+        "deep": "DNS is a distributed database. No single machine holds all names, and responsibility is delegated down the tree of domains. Besides addresses (A and AAAA records) it stores mail servers (MX), aliases (CNAME) and text records used to prove domain ownership. Classic DNS travels unencrypted over UDP, so anyone on the path can see which sites you look up; DNS over HTTPS and DNS over TLS encrypt the lookup itself."
+      },
+      "analogy": "Looking up a friend's number in your contacts instead of memorising it.",
+      "realWorld": ["Every time you type a web address", "Email delivery finds mail servers through DNS", "Websites move servers by changing their DNS records"],
+      "sources": [{"title": "Domain Name System — Wikipedia", "url": "https://en.wikipedia.org/wiki/Domain_Name_System"}],
+      "requires": ["udp"],
+      "diagram": {
+        "nodes": [
+          {"id": "you", "label": "Your phone", "x": 0.12, "y": 0.5},
+          {"id": "res", "label": "Resolver", "x": 0.42, "y": 0.5},
+          {"id": "root", "label": "Root server", "x": 0.82, "y": 0.13},
+          {"id": "tld", "label": ".com server", "x": 0.82, "y": 0.5},
+          {"id": "ns", "label": "example.com\nnameserver", "x": 0.82, "y": 0.87},
+          {"id": "a1", "label": "'ask the .com server'", "x": 0.5, "y": 0.13, "role": "note"},
+          {"id": "a2", "label": "'ask example.com's nameserver'", "x": 0.62, "y": 0.62, "role": "note"},
+          {"id": "a3", "label": "'it's 203.0.113.7'", "x": 0.5, "y": 0.87, "role": "note"}
+        ],
+        "edges": [
+          {"from": "you", "to": "res", "label": "example.com?"},
+          {"from": "res", "to": "root"},
+          {"from": "res", "to": "tld"},
+          {"from": "res", "to": "ns"},
+          {"from": "res", "to": "you", "label": "203.0.113.7", "style": "dashed"}
+        ],
+        "steps": [
+          {"caption": "You type example.com. Your phone asks a resolver for its address.", "show": ["you>res"]},
+          {"caption": "The resolver asks a root server, which points to the server for .com.", "show": ["res>root", "a1"]},
+          {"caption": "The .com server points to example.com's own nameserver.", "show": ["res>tld", "a2"]},
+          {"caption": "That nameserver gives the actual address.", "show": ["res>ns", "a3"]},
+          {"caption": "The resolver passes the address back and remembers it for next time.", "show": ["res>you"], "hide": ["you>res"]}
+        ]
+      }
+    },
+    {
+      "id": "http",
+      "title": "HTTP",
+      "cluster": "networks",
+      "aliases": ["https", "web", "request", "response", "status code", "api"],
+      "summary": "The request-and-response language browsers and apps use to talk to web servers.",
+      "destination": true,
+      "levels": {
+        "intro": "HTTP is how your browser asks a server for a page: 'please send me /index.html'. The server replies with a status, like 200 OK, and the content.",
+        "core": "An HTTP request has a method (GET to fetch, POST to send data, and others), a path, headers carrying extra details like cookies or the accepted languages, and sometimes a body. The response has a status code (200 OK, 301 moved, 404 not found, 500 server error), headers, and a body: HTML, an image, or JSON for apps. Each request stands alone; logins work by sending a cookie or token with every request.",
+        "deep": "Loading one page usually takes dozens of requests: HTML, then stylesheets, scripts, images and API calls. HTTP/1.1 sends requests one after another per connection; HTTP/2 multiplexes many over one TCP connection; HTTP/3 runs over QUIC on UDP to avoid TCP's head-of-line blocking. Nearly all app back ends are HTTP APIs. HTTPS is simply HTTP sent inside a TLS-encrypted connection."
+      },
+      "analogy": "Ordering at a counter: you ask for a specific item and get it back with a receipt saying whether it worked.",
+      "realWorld": ["Loading any website", "Apps fetching your feed from an API", "404 Not Found pages"],
+      "sources": [
+        {"title": "HTTP — Wikipedia", "url": "https://en.wikipedia.org/wiki/HTTP"},
+        {"title": "List of HTTP status codes — Wikipedia", "url": "https://en.wikipedia.org/wiki/List_of_HTTP_status_codes"}
+      ],
+      "requires": ["tcp", "dns"],
+      "diagram": {
+        "nodes": [
+          {"id": "browser", "label": "Browser", "x": 0.15, "y": 0.08},
+          {"id": "server", "label": "Web server", "x": 0.85, "y": 0.08},
+          {"id": "bl", "label": "", "x": 0.15, "y": 0.97, "role": "anchor"},
+          {"id": "sl", "label": "", "x": 0.85, "y": 0.97, "role": "anchor"},
+          {"id": "b1", "label": "", "x": 0.15, "y": 0.24, "role": "anchor"},
+          {"id": "s1", "label": "", "x": 0.85, "y": 0.34, "role": "anchor"},
+          {"id": "s2", "label": "", "x": 0.85, "y": 0.5, "role": "anchor"},
+          {"id": "b2", "label": "", "x": 0.15, "y": 0.6, "role": "anchor"},
+          {"id": "b3", "label": "", "x": 0.15, "y": 0.72, "role": "anchor"},
+          {"id": "s3", "label": "", "x": 0.85, "y": 0.82, "role": "anchor"},
+          {"id": "pre", "label": "Already done: DNS lookup, TCP connection", "x": 0.5, "y": 0.16, "role": "note"}
+        ],
+        "edges": [
+          {"from": "browser", "to": "bl", "style": "line"},
+          {"from": "server", "to": "sl", "style": "line"},
+          {"from": "b1", "to": "s1", "label": "GET /index.html"},
+          {"from": "s2", "to": "b2", "label": "200 OK + the page"},
+          {"from": "b3", "to": "s3", "label": "GET /photo.jpg …"}
+        ],
+        "steps": [
+          {"caption": "The browser has found the server's address (DNS) and opened a connection (TCP).", "show": ["browser>bl", "server>sl", "pre"]},
+          {"caption": "It sends a request: method GET, path /index.html, plus headers.", "show": ["b1>s1"]},
+          {"caption": "The server replies with a status code, 200 OK, and the HTML.", "show": ["s2>b2"]},
+          {"caption": "The HTML mentions images and styles, so the browser sends more requests, one for each.", "show": ["b3>s3"]}
+        ]
+      }
+    },
+    {
+      "id": "public-key-crypto",
+      "title": "Public-key cryptography",
+      "cluster": "networks",
+      "aliases": ["public key", "private key", "rsa", "asymmetric encryption", "digital signature", "encryption"],
+      "summary": "A pair of keys: anyone can lock with the public one, only the private one unlocks.",
+      "levels": {
+        "intro": "Public-key cryptography uses two matching keys. You share the public key with everyone; you keep the private key secret. Anything locked with your public key can only be unlocked with your private key.",
+        "core": "Before this idea (1976–77), two people had to meet or use a trusted courier to agree on a secret key. With a key pair, anyone can send you a secret using your public key, without any prior meeting. It also works in reverse for signatures: you sign with your private key, and anyone can check the signature with your public key, proving the message came from you and wasn't changed. The maths makes it infeasible to work out the private key from the public one.",
+        "deep": "RSA's security rests on modular arithmetic: multiplying two huge primes is easy, but factoring their product back is believed infeasible for numbers hundreds of digits long. Elliptic-curve cryptography gives the same security with much smaller keys and is now the usual choice. Public-key operations are slow, so real systems use them only to agree on a fast symmetric key. A large quantum computer could break RSA and elliptic curves, which is why post-quantum algorithms are being deployed."
+      },
+      "analogy": "An open padlock you hand out freely: anyone can snap it shut on a box, but only your key opens it.",
+      "realWorld": ["The padlock icon in browsers (TLS)", "Signed app updates", "Passkeys and end-to-end encrypted messaging"],
+      "sources": [
+        {"title": "Public-key cryptography — Wikipedia", "url": "https://en.wikipedia.org/wiki/Public-key_cryptography"},
+        {"title": "RSA (cryptosystem) — Wikipedia", "url": "https://en.wikipedia.org/wiki/RSA_(cryptosystem)"}
+      ],
+      "requires": ["modular-arithmetic"],
+      "diagram": {
+        "nodes": [
+          {"id": "bob", "label": "Bob", "x": 0.85, "y": 0.15},
+          {"id": "pub", "label": "Public key\n(shared)", "x": 0.5, "y": 0.15, "role": "pill"},
+          {"id": "priv", "label": "Private key\n(secret)", "x": 0.85, "y": 0.45, "role": "pill"},
+          {"id": "alice", "label": "Alice", "x": 0.15, "y": 0.15},
+          {"id": "msg", "label": "Locked message\nx8#q!v2…", "x": 0.15, "y": 0.62},
+          {"id": "eve", "label": "Eavesdropper sees only scrambled data", "x": 0.5, "y": 0.92, "role": "note"},
+          {"id": "read", "label": "Hi Bob!", "x": 0.85, "y": 0.78, "role": "pill"}
+        ],
+        "edges": [
+          {"from": "bob", "to": "pub", "style": "line"},
+          {"from": "bob", "to": "priv", "style": "line"},
+          {"from": "pub", "to": "alice", "label": "anyone can have it"},
+          {"from": "alice", "to": "msg", "label": "lock with public key"},
+          {"from": "msg", "to": "read", "label": "unlock with private key"}
+        ],
+        "steps": [
+          {"caption": "Bob creates a matching pair of keys: a public key and a private key.", "show": ["bob>pub", "bob>priv"]},
+          {"caption": "He publishes the public key. Alice, or anyone, can get it.", "show": ["pub>alice"]},
+          {"caption": "Alice locks her message with Bob's public key. Now even Alice can't unlock it.", "show": ["alice>msg"]},
+          {"caption": "Anyone intercepting it sees scrambled data.", "show": ["eve"]},
+          {"caption": "Only Bob's private key unlocks it. They never had to share a secret in advance.", "show": ["msg>read"]}
+        ]
+      }
+    },
+    {
+      "id": "tls",
+      "title": "TLS and HTTPS",
+      "cluster": "networks",
+      "aliases": ["https", "ssl", "certificate", "padlock", "encryption in transit"],
+      "summary": "The protocol behind the padlock: encrypts a connection and proves you reached the real site.",
+      "destination": true,
+      "levels": {
+        "intro": "TLS wraps a connection in encryption so nobody in between can read or alter it. HTTPS is just HTTP sent through TLS. The padlock in your browser means TLS is on.",
+        "core": "A TLS connection starts with a handshake. The server sends its certificate: its public key, signed by a certificate authority your device already trusts, which proves the key really belongs to that domain. Client and server then use public-key cryptography to agree on a fresh shared secret that no eavesdropper can work out. From then on, all data is encrypted and authenticated with fast symmetric encryption using keys derived from that secret.",
+        "deep": "TLS 1.3 completes the handshake in a single round trip and always uses ephemeral key exchange (Diffie–Hellman), giving forward secrecy: stealing the server's long-term key later can't decrypt past sessions. The certificate system rests on about a hundred certificate authorities trusted by operating systems and browsers; public Certificate Transparency logs record every certificate issued, so rogue ones can be spotted. TLS protects data in transit, not on the server once it arrives."
+      },
+      "analogy": "Checking someone's official ID, then agreeing on a private code language that nobody listening can learn.",
+      "realWorld": ["The padlock icon on websites", "Apps talking securely to their servers", "Secure email delivery between servers"],
+      "sources": [
+        {"title": "Transport Layer Security — Wikipedia", "url": "https://en.wikipedia.org/wiki/Transport_Layer_Security"},
+        {"title": "Public key certificate — Wikipedia", "url": "https://en.wikipedia.org/wiki/Public_key_certificate"}
+      ],
+      "requires": ["tcp", "public-key-crypto"],
+      "diagram": {
+        "nodes": [
+          {"id": "client", "label": "Your app", "x": 0.15, "y": 0.08},
+          {"id": "server", "label": "bank.example", "x": 0.85, "y": 0.08},
+          {"id": "cl", "label": "", "x": 0.15, "y": 0.97, "role": "anchor"},
+          {"id": "sl", "label": "", "x": 0.85, "y": 0.97, "role": "anchor"},
+          {"id": "c1", "label": "", "x": 0.15, "y": 0.2, "role": "anchor"},
+          {"id": "s1", "label": "", "x": 0.85, "y": 0.28, "role": "anchor"},
+          {"id": "s2", "label": "", "x": 0.85, "y": 0.38, "role": "anchor"},
+          {"id": "c2", "label": "", "x": 0.15, "y": 0.46, "role": "anchor"},
+          {"id": "check", "label": "Check: signed by a trusted authority, for this exact domain", "x": 0.5, "y": 0.55, "role": "note"},
+          {"id": "c3", "label": "", "x": 0.15, "y": 0.64, "role": "anchor"},
+          {"id": "s3", "label": "", "x": 0.85, "y": 0.72, "role": "anchor"},
+          {"id": "c4", "label": "", "x": 0.15, "y": 0.82, "role": "anchor"},
+          {"id": "s4", "label": "", "x": 0.85, "y": 0.9, "role": "anchor"}
+        ],
+        "edges": [
+          {"from": "client", "to": "cl", "style": "line"},
+          {"from": "server", "to": "sl", "style": "line"},
+          {"from": "c1", "to": "s1", "label": "hello + my key share"},
+          {"from": "s2", "to": "c2", "label": "certificate + key share"},
+          {"from": "c3", "to": "s3", "label": "finished (encrypted)"},
+          {"from": "c4", "to": "s4", "label": "encrypted HTTP", "style": "both"}
+        ],
+        "steps": [
+          {"caption": "A TCP connection is open between your app and the server. Nothing is encrypted yet.", "show": ["client>cl", "server>sl"]},
+          {"caption": "Your app says hello and sends its half of a key exchange.", "show": ["c1>s1"]},
+          {"caption": "The server replies with its certificate and its half of the key exchange.", "show": ["s2>c2"]},
+          {"caption": "Your app checks the certificate. If it's not valid for this domain, the connection stops here.", "show": ["check"]},
+          {"caption": "Both sides combine the halves into the same secret key, which never crossed the network.", "show": ["c3>s3"]},
+          {"caption": "From now on everything, including the HTTP requests, travels encrypted.", "show": ["c4>s4"]}
+        ]
+      }
+    }
+  ]
+}
