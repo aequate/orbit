@@ -76,8 +76,15 @@ jobs:
       - name: Screenshots (simulator)
         continue-on-error: true
         run: |
-          APP=build/DerivedData/Build/Products/Debug-iphonesimulator/Orbit.app
+          set -x
+          APP=$(find build/DerivedData "$HOME/Library/Developer/Xcode/DerivedData" -type d -name Orbit.app -path "*Debug-iphonesimulator*" 2>/dev/null | head -n 1 || true)
+          if [ -z "$APP" ]; then
+            xcodebuild build -project "$PROJECT" -scheme "$SCHEME" -configuration Debug               -destination "id=$SIM_UDID" -derivedDataPath build/SimBuild               CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= > build-sim.log 2>&1 || tail -n 30 build-sim.log
+            APP=build/SimBuild/Build/Products/Debug-iphonesimulator/Orbit.app
+          fi
+          echo "App: $APP"
           test -d "$APP"
+          set +x
           BUNDLE=app.orbit.learn
           xcrun simctl install "$SIM_UDID" "$APP"
           xcrun simctl status_bar "$SIM_UDID" override --time "9:41" --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3 || true
