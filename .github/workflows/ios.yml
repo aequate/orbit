@@ -73,6 +73,52 @@ jobs:
           grep -E "error:|failed|Executed|\*\* TEST" build-test.log | sort -u | head -n 300 || true
           exit $status
 
+      - name: Screenshots (simulator)
+        continue-on-error: true
+        run: |
+          APP=build/DerivedData/Build/Products/Debug-iphonesimulator/Orbit.app
+          test -d "$APP"
+          BUNDLE=app.orbit.learn
+          xcrun simctl install "$SIM_UDID" "$APP"
+          xcrun simctl status_bar "$SIM_UDID" override --time "9:41" --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3 || true
+          mkdir -p shots
+          shoot() {
+            name=$1; shift
+            xcrun simctl terminate "$SIM_UDID" "$BUNDLE" >/dev/null 2>&1 || true
+            xcrun simctl launch "$SIM_UDID" "$BUNDLE" "$@" >/dev/null
+            sleep 5
+            xcrun simctl io "$SIM_UDID" screenshot "shots/$name.png" >/dev/null 2>&1 && echo "shot $name"
+          }
+          for look in light dark; do
+            xcrun simctl ui "$SIM_UDID" appearance "$look"
+            shoot "$look-01-map" -orbitSeed YES -orbitScreen map
+            shoot "$look-02-topic-read" -orbitSeed YES -orbitScreen topic:dijkstra -orbitMode read
+            shoot "$look-03-topic-build" -orbitSeed YES -orbitScreen topic:hash-table -orbitMode build
+            shoot "$look-04-play" -orbitSeed YES -orbitScreen topic:dijkstra -orbitMode play -orbitFrame 6
+            shoot "$look-05-tryit" -orbitSeed YES -orbitScreen topic:gradient-descent -orbitMode play -orbitTry rate=1.8 -orbitFrame 4 -orbitScroll tryit
+            shoot "$look-06-compare" -orbitSeed YES -orbitScreen compare:tcp-udp
+            shoot "$look-07-journeys" -orbitSeed YES -orbitScreen journeys
+            shoot "$look-08-journey" -orbitSeed YES -orbitScreen journey:algorithms
+            shoot "$look-09-review" -orbitSeed YES -orbitScreen review
+            shoot "$look-10-you" -orbitSeed YES -orbitScreen you
+          done
+          xcrun simctl ui "$SIM_UDID" appearance light
+          shoot "light-11-onboarding" -orbitOnboarding YES
+          shoot "light-12-tower" -orbitSeed YES -orbitScreen map -orbitTower YES
+          xcrun simctl ui "$SIM_UDID" content_size accessibility-medium
+          shoot "light-13-bigtext-topic" -orbitSeed YES -orbitScreen topic:binary-search -orbitMode play
+          shoot "light-14-bigtext-you" -orbitSeed YES -orbitScreen you
+          xcrun simctl ui "$SIM_UDID" content_size large
+          ls -1 shots | wc -l
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: Orbit-screenshots-${{ github.run_number }}
+          path: shots/*.png
+          if-no-files-found: ignore
+
       - name: Archive (unsigned)
         run: |
           if xcodebuild archive \

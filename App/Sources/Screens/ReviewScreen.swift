@@ -136,7 +136,7 @@ private struct ReviewSession: View {
             VStack(alignment: .leading, spacing: 18) {
                 HStack {
                     Button("End") { finish() }
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.system(.callout, weight: .semibold))
                     Spacer()
                     if index < questions.count {
                         Text(String(index + 1) + " of " + String(questions.count))
@@ -198,7 +198,7 @@ private struct ReviewSession: View {
     private func feedback(_ q: QuizQuestion, right: Bool) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Label(right ? "Correct" : "Not quite", systemImage: right ? "checkmark.circle.fill" : "xmark.circle.fill")
-                .font(.system(size: 17, weight: .bold))
+                .font(.system(.body, weight: .bold))
                 .foregroundStyle(right ? Theme.good : Theme.bad)
             Text(q.explanation)
                 .font(Theme.body)
@@ -253,13 +253,13 @@ private struct ChoiceButton: View {
         Button(action: action) {
             HStack {
                 Text(text)
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.system(.body, weight: .semibold))
                     .foregroundStyle(Theme.ink)
                     .multilineTextAlignment(.leading)
                 Spacer()
                 if let symbol {
                     Image(systemName: symbol)
-                        .font(.system(size: 18, weight: .bold))
+                        .font(.system(.title3, weight: .bold))
                         .foregroundStyle(state == .right ? Theme.good : Theme.bad)
                 }
             }

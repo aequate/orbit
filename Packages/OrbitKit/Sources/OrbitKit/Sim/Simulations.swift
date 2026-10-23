@@ -43,17 +43,30 @@ public enum Simulations {
         }
     }
 
+    static func plural(_ n: Int, _ one: String, _ many: String) -> String {
+        n == 1 ? one : many
+    }
+
+    /// A number without trailing zeros, with a proper minus sign: 1, 0.25, −3.5.
+    static func short(_ x: Double) -> String {
+        var s = fmt(x, 3)
+        while s.contains(".") && (s.hasSuffix("0") || s.hasSuffix(".")) { s.removeLast() }
+        if s == "-0" { s = "0" }
+        return s.replacingOccurrences(of: "-", with: "−")
+    }
+
     // MARK: Numbers
 
-    static func binaryCounter() -> Simulation {
-        let places = [8, 4, 2, 1]
+    static func binaryCounter(bits width: Int = 4) -> Simulation {
+        let places = (0..<width).map { 1 << (width - 1 - $0) }
+        let top = (1 << width) - 1
         var frames: [SimFrame] = []
-        var previous = [false, false, false, false]
-        for n in 0...15 {
+        var previous = [Bool](repeating: false, count: width)
+        for n in 0...top {
             let bits = places.map { n & $0 != 0 }
             var cells: [SimCell] = []
             var flips = 0
-            for i in 0..<4 {
+            for i in 0..<width {
                 let flipped = n > 0 && bits[i] != previous[i]
                 if flipped { flips += 1 }
                 let mark: Mark = flipped ? .fresh : (bits[i] ? .focus : .idle)
@@ -63,7 +76,7 @@ public enum Simulations {
             let parts = places.filter { n & $0 != 0 }.map { String($0) }
             var caption: String
             if n == 0 {
-                caption = "0 is 0000: every switch is off. Each place is worth double the one to its right."
+                caption = "0 is " + pattern + ": every switch is off. Each place is worth double the one to its right."
             } else if parts.count == 1 {
                 caption = String(n) + " is " + pattern + ": just the " + parts[0] + "s place."
             } else {
@@ -75,35 +88,49 @@ public enum Simulations {
             frames.append(SimFrame(caption, .array(ArrayScene(cells: cells, label: "= " + String(n)))))
             previous = bits
         }
-        return Simulation(id: "binaryCounter", title: "Counting in binary", blurb: "Four bits counting from 0 to 15.", frames: frames)
+        let next = String(top + 1)
+        frames.append(SimFrame(
+            "That's every pattern " + String(width) + " bits can make: " + next + " of them, from 0 to " + String(top) + ". Each extra bit doubles the count.",
+            .array(ArrayScene(cells: places.map { SimCell("1", .done, note: String($0)) }, label: "= " + String(top)))
+        ))
+        let blurb = String(width) + " bits counting from 0 to " + String(top) + "."
+        return Simulation(id: "binaryCounter", title: "Counting in binary", blurb: blurb, frames: frames)
     }
 
-    static func halving() -> Simulation {
-        var cells = [SimCell("64", .focus, note: "start")]
-        var frames = [SimFrame("Start with 64 items. How many times can you halve them before only 1 is left?", .array(ArrayScene(cells: cells)))]
-        var value = 64
+    static func halving(start: Int = 64) -> Simulation {
+        var cells = [SimCell(String(start), .focus, note: "start")]
+        var frames = [SimFrame("Start with " + String(start) + " items. How many times can you halve them before only 1 is left?", .array(ArrayScene(cells: cells)))]
+        var value = start
         var step = 0
         while value > 1 {
+            let odd = value % 2 == 1
             value /= 2
             step += 1
             for i in cells.indices { cells[i].mark = .idle }
             cells.append(SimCell(String(value), .fresh, note: "step " + String(step)))
             let unit = step == 1 ? " halving so far." : " halvings so far."
-            frames.append(SimFrame("Halve again: " + String(value) + ". That's " + String(step) + unit, .array(ArrayScene(cells: cells))))
+            let rounding = odd ? " (an odd number, so round down)" : ""
+            frames.append(SimFrame("Halve again: " + String(value) + rounding + ". That's " + String(step) + unit, .array(ArrayScene(cells: cells))))
         }
         cells[cells.count - 1].mark = .done
-        frames.append(SimFrame("6 halvings take 64 down to 1, so log₂ 64 = 6. A billion would need only about 30.", .array(ArrayScene(cells: cells))))
+        let exact = (start & (start - 1)) == 0
+        var outro = String(step) + " halvings take " + String(start) + " down to 1, so log₂ " + String(start) + " = " + String(step) + ". A billion would need only about 30."
+        if !exact {
+            outro = String(step) + " halvings take " + String(start) + " down to 1. Rounding down trimmed a little each time: the exact log₂ " + String(start) + " is " + fmt(log2(Double(start))) + ". A billion would need only about 30."
+        }
+        frames.append(SimFrame(outro, .array(ArrayScene(cells: cells))))
         return Simulation(id: "halving", title: "Halving to one", blurb: "A logarithm counts how many halvings it takes.", frames: frames)
     }
 
     // MARK: Searching and sorting
 
-    static func binarySearch() -> Simulation {
+    static func binarySearch(target: Int = 52) -> Simulation {
         let data = [3, 8, 12, 17, 21, 25, 31, 38, 44, 52, 60, 71]
-        let target = 52
+        let goal = String(target)
         var lo = 0
         var hi = data.count - 1
         var checks = 0
+        var found = false
 
         func scene(mid: Int?, found: Bool = false) -> SimScene {
             var cells: [SimCell] = []
@@ -118,33 +145,42 @@ public enum Simulations {
                 markers.append(SimMarker(hi, "high"))
             }
             if let mid { markers.append(SimMarker(mid, "mid")) }
-            return .array(ArrayScene(cells: cells, markers: markers, label: "Looking for 52"))
+            return .array(ArrayScene(cells: cells, markers: markers, label: "Looking for " + goal))
         }
 
-        var frames = [SimFrame("Find 52 in this sorted list of 12 numbers. Start by checking the middle.", scene(mid: nil))]
+        var frames = [SimFrame("Find " + goal + " in this sorted list of 12 numbers. Start by checking the middle.", scene(mid: nil))]
         while lo <= hi {
             let mid = (lo + hi) / 2
             checks += 1
             let value = data[mid]
             if value == target {
-                let caption = "Found 52 after " + String(checks) + " checks. Checking one by one from the left would have taken " + String(mid + 1) + "."
+                found = true
+                let caption = "Found " + goal + " after " + String(checks) + plural(checks, " check", " checks") + ". Checking one by one from the left would have taken " + String(mid + 1) + "."
                 frames.append(SimFrame(caption, scene(mid: mid, found: true)))
                 break
             }
             frames.append(SimFrame("Check the middle: " + String(value) + ".", scene(mid: mid)))
             if value < target {
                 lo = mid + 1
-                frames.append(SimFrame(String(value) + " is less than 52, so 52 can only be to the right. Discard the left half.", scene(mid: nil)))
+                frames.append(SimFrame(String(value) + " is less than " + goal + ", so " + goal + " can only be to the right. Discard the left half.", scene(mid: nil)))
             } else {
                 hi = mid - 1
-                frames.append(SimFrame(String(value) + " is more than 52, so 52 can only be to the left. Discard the right half.", scene(mid: nil)))
+                frames.append(SimFrame(String(value) + " is more than " + goal + ", so " + goal + " can only be to the left. Discard the right half.", scene(mid: nil)))
             }
+        }
+        if !found {
+            let caption = "Nothing is left between low and high, so " + goal + " is not in the list. " + String(checks) + " checks were enough to be sure; one by one would have meant checking all 12."
+            frames.append(SimFrame(caption, scene(mid: nil)))
         }
         return Simulation(id: "binarySearch", title: "Binary search", blurb: "Halving the search range with every check.", frames: frames)
     }
 
-    static func insertionSort() -> Simulation {
-        var a = [5, 2, 8, 1, 9, 3]
+    static let insertionLists = [[5, 2, 8, 1, 9, 3], [1, 2, 5, 3, 8, 9], [9, 8, 5, 3, 2, 1]]
+
+    static func insertionSort(list: Int = 0) -> Simulation {
+        let pick = insertionLists.indices.contains(list) ? list : 0
+        var a = insertionLists[pick]
+        var swaps = 0
 
         func scene(sorted: Int, focus: Int? = nil, compare: Int? = nil) -> SimScene {
             var cells: [SimCell] = []
@@ -154,7 +190,7 @@ public enum Simulations {
                 if i == focus { mark = .focus }
                 cells.append(SimCell(String(value), mark))
             }
-            return .array(ArrayScene(cells: cells))
+            return .array(ArrayScene(cells: cells, label: "Swaps: " + String(swaps)))
         }
 
         var frames = [SimFrame("Insertion sort: take each item in turn and slide it left until the item before it is smaller. One item on its own is already sorted.", scene(sorted: 0))]
@@ -164,6 +200,7 @@ public enum Simulations {
             while j > 0 && a[j - 1] > a[j] {
                 frames.append(SimFrame(String(a[j - 1]) + " is bigger than " + String(a[j]) + ", so swap them.", scene(sorted: i, focus: j, compare: j - 1)))
                 a.swapAt(j - 1, j)
+                swaps += 1
                 j -= 1
             }
             if j > 0 {
@@ -172,7 +209,13 @@ public enum Simulations {
                 frames.append(SimFrame(String(a[j]) + " is the smallest so far, so it goes to the front.", scene(sorted: i, focus: j)))
             }
         }
-        frames.append(SimFrame("Sorted. Insertion sort is quick on small or nearly sorted lists; on big ones, merge sort's halving wins.", scene(sorted: a.count - 1)))
+        let notes = [
+            "Insertion sort is quick on small or nearly sorted lists; on big ones, merge sort's halving wins.",
+            "A nearly sorted list is its best case: almost every item is already in place.",
+            "A reversed list is its worst case: every item slides all the way to the front.",
+        ]
+        let outro = "Sorted with " + String(swaps) + plural(swaps, " swap. ", " swaps. ") + notes[pick]
+        frames.append(SimFrame(outro, scene(sorted: a.count - 1)))
         return Simulation(id: "insertionSort", title: "Insertion sort", blurb: "Sliding each item into place.", frames: frames)
     }
 
@@ -249,10 +292,11 @@ public enum Simulations {
         key.unicodeScalars.reduce(0) { $0 + Int($1.value) }
     }
 
-    static func hashInsert() -> Simulation {
+    static func hashInsert(size: Int = 5) -> Simulation {
         let keys = ["cat", "dog", "owl", "bee", "ant", "fox"]
-        let size = 5
+        let size = max(1, size)
         var table = [[String]](repeating: [], count: size)
+        var collisions = 0
 
         func scene(incoming: String?, target: Int?, newest: String? = nil, found: String? = nil) -> SimScene {
             let buckets = table.map { chain in
@@ -264,12 +308,12 @@ public enum Simulations {
             return .buckets(BucketScene(buckets: buckets, incoming: incoming, target: target))
         }
 
-        var frames = [SimFrame("Five empty buckets. A key's bucket is computed from the key itself, so it can be found again the same way.", scene(incoming: nil, target: nil))]
+        var frames = [SimFrame(String(size) + " empty buckets. A key's bucket is computed from the key itself, so it can be found again the same way.", scene(incoming: nil, target: nil))]
         for key in keys {
             let h = toyHash(key)
             let bucket = h % size
             let codes = key.unicodeScalars.map { String($0.value) }.joined(separator: " + ")
-            let math = "hash(" + key + ") = " + codes + " = " + String(h) + ", and " + String(h) + " mod 5 = " + String(bucket) + "."
+            let math = "hash(" + key + ") = " + codes + " = " + String(h) + ", and " + String(h) + " mod " + String(size) + " = " + String(bucket) + "."
             frames.append(SimFrame(math, scene(incoming: key, target: bucket)))
             let earlier = table[bucket]
             table[bucket].append(key)
@@ -277,11 +321,17 @@ public enum Simulations {
             if earlier.isEmpty {
                 caption = key + " goes straight into bucket " + String(bucket) + "."
             } else {
+                collisions += 1
                 caption = "Bucket " + String(bucket) + " already holds " + earlier.joined(separator: " and ") + ": a collision. " + key + " joins the chain."
             }
             frames.append(SimFrame(caption, scene(incoming: nil, target: bucket, newest: key)))
         }
-        frames.append(SimFrame("Looking up fox repeats the same sum: bucket 3, then a short walk along its chain. No scanning of the whole table.", scene(incoming: "fox", target: 3, found: "fox")))
+        let last = keys[keys.count - 1]
+        let home = toyHash(last) % size
+        let longest = table.map(\.count).max() ?? 0
+        let summary = String(collisions) + plural(collisions, " collision", " collisions") + " with " + String(size) + " buckets; the longest chain holds " + String(longest) + ". "
+        let outro = summary + "Looking up " + last + " repeats the same sum: bucket " + String(home) + ", then a short walk along its chain. No scanning of the whole table."
+        frames.append(SimFrame(outro, scene(incoming: last, target: home, found: last)))
         return Simulation(id: "hashInsert", title: "Filling a hash table", blurb: "Keys computed into buckets, with collisions chained.", frames: frames)
     }
 
@@ -335,16 +385,16 @@ public enum Simulations {
         return .graph(GraphScene(nodes: nodes, edges: edges, footer: footer))
     }
 
-    static func breadthFirst() -> Simulation {
+    static func breadthFirst(start: String = "A") -> Simulation {
         let g = searchGraph
-        var queue = ["A"]
-        var discovered: Set<String> = ["A"]
+        var queue = [start]
+        var discovered: Set<String> = [start]
         var visited: Set<String> = []
         var used: Set<String> = []
         var order: [String] = []
         var frames = [SimFrame(
-            "Breadth-first search from A. A queue holds the places waiting to be visited.",
-            graphScene(g, done: visited, waiting: discovered, focus: nil, used: used, footer: "Queue: A")
+            "Breadth-first search from " + start + ". A queue holds the places waiting to be visited.",
+            graphScene(g, done: visited, waiting: discovered, focus: nil, used: used, footer: "Queue: " + start)
         )]
         while !queue.isEmpty {
             let current = queue.removeFirst()
@@ -366,20 +416,20 @@ public enum Simulations {
             frames.append(SimFrame(caption, graphScene(g, done: visited.subtracting([current]), waiting: discovered.subtracting(visited), focus: current, used: used, footer: footer)))
         }
         frames.append(SimFrame(
-            "Done. BFS visited " + order.joined(separator: ", ") + ": ring by ring, outward from A.",
+            "Done. BFS visited " + order.joined(separator: ", ") + ": ring by ring, outward from " + start + ".",
             graphScene(g, done: visited, waiting: [], focus: nil, used: used, footer: "Order: " + order.joined(separator: " "))
         ))
         return Simulation(id: "bfs", title: "Breadth-first", blurb: "Explore in rings using a queue.", frames: frames)
     }
 
-    static func depthFirst() -> Simulation {
+    static func depthFirst(start: String = "A") -> Simulation {
         let g = searchGraph
         var visited: Set<String> = []
         var used: Set<String> = []
         var order: [String] = []
         var path: [String] = []
         var frames = [SimFrame(
-            "Depth-first search from A: follow one path as deep as it goes, then back up and try the next branch.",
+            "Depth-first search from " + start + ": follow one path as deep as it goes, then back up and try the next branch.",
             graphScene(g, done: [], waiting: [], focus: nil, used: [], footer: "Path: (empty)")
         )]
 
@@ -403,18 +453,22 @@ public enum Simulations {
             path.removeLast()
         }
 
-        visit("A")
-        frames.append(SimFrame(
-            "Done. DFS visited " + order.joined(separator: ", ") + ": it went deep down one branch before touching C.",
-            graphScene(g, done: visited, waiting: [], focus: nil, used: used, footer: "Order: " + order.joined(separator: " "))
-        ))
+        visit(start)
+        var outro = "Done. DFS visited " + order.joined(separator: ", ") + ": it went as deep as it could down each branch before backing up."
+        if start == "A" {
+            outro = "Done. DFS visited " + order.joined(separator: ", ") + ": it went deep down one branch before touching C."
+        }
+        frames.append(SimFrame(outro, graphScene(g, done: visited, waiting: [], focus: nil, used: used, footer: "Order: " + order.joined(separator: " "))))
         return Simulation(id: "dfs", title: "Depth-first", blurb: "Go deep first, backtrack when stuck.", frames: frames)
     }
 
     // MARK: Trees
 
-    static func bstInsert() -> Simulation {
-        let values = [50, 30, 70, 20, 40, 60, 80, 35]
+    static let bstOrders = [[50, 30, 70, 20, 40, 60, 80, 35], [20, 30, 35, 40, 50, 60, 70, 80], [20, 80, 30, 70, 35, 60, 40, 50]]
+
+    static func bstInsert(order: Int = 0) -> Simulation {
+        let pick = bstOrders.indices.contains(order) ? order : 0
+        let values = bstOrders[pick]
         let sorted = values.sorted()
         var left: [Int: Int] = [:]
         var right: [Int: Int] = [:]
@@ -423,12 +477,39 @@ public enum Simulations {
         var inserted: [Int] = []
         var root: Int?
 
+        // Work out how tall the finished tree is first, so every level fits in the frame.
+        var height = 0
+        do {
+            var probeLeft: [Int: Int] = [:]
+            var probeRight: [Int: Int] = [:]
+            var probeRoot: Int?
+            for value in values {
+                guard var at = probeRoot else {
+                    probeRoot = value
+                    continue
+                }
+                var level = 1
+                while true {
+                    let next = value < at ? probeLeft[at] : probeRight[at]
+                    if let next {
+                        at = next
+                        level += 1
+                    } else {
+                        if value < at { probeLeft[at] = value } else { probeRight[at] = value }
+                        break
+                    }
+                }
+                height = max(height, level)
+            }
+        }
+        let rowGap = min(0.24, 0.76 / Double(max(1, height)))
+
         func scene(focus: Int?, fresh: Int?, footer: String) -> SimScene {
             var nodes: [GraphScene.Node] = []
             for value in inserted {
                 let rank = sorted.firstIndex(of: value) ?? 0
                 let x = 0.06 + 0.88 * (Double(rank) + 0.5) / Double(sorted.count)
-                let y = 0.12 + Double(depth[value] ?? 0) * 0.24
+                let y = 0.12 + Double(depth[value] ?? 0) * rowGap
                 var mark: Mark = .idle
                 if value == fresh { mark = .fresh }
                 if value == focus { mark = .focus }
@@ -470,7 +551,12 @@ public enum Simulations {
             }
         }
         let inOrder = sorted.map { String($0) }.joined(separator: " ")
-        frames.append(SimFrame("Read left, node, right and you get them in order: " + inOrder + ". Each insert walked one path, not the whole tree.", scene(focus: nil, fresh: nil, footer: "In order: " + inOrder)))
+        let levels = (depth.values.max() ?? 0) + 1
+        var outro = "Read left, node, right and you get them in order: " + inOrder + ". Each insert walked one path, not the whole tree: only " + String(levels) + " levels for " + String(values.count) + " values."
+        if levels == values.count {
+            outro = "This order built a stick, not a bush: " + String(levels) + " levels for " + String(values.count) + " values, so a search walks past every one, like a list. Balanced trees rotate to stop this."
+        }
+        frames.append(SimFrame(outro, scene(focus: nil, fresh: nil, footer: "In order: " + inOrder)))
         return Simulation(id: "bstInsert", title: "Building a search tree", blurb: "Inserting values by going left or right.", frames: frames)
     }
 
@@ -483,8 +569,12 @@ public enum Simulations {
         return Point2(0.05 + 0.9 * x, 0.14 + Double(depth) * 0.3)
     }
 
-    static func heapInsert() -> Simulation {
+    static let heapOrders = [[5, 3, 8, 1, 6, 2], [8, 6, 5, 3, 2, 1], [1, 2, 3, 5, 6, 8]]
+
+    static func heapInsert(order: Int = 0) -> Simulation {
+        let pick = heapOrders.indices.contains(order) ? order : 0
         var heap: [Int] = []
+        var swaps = 0
 
         func scene(_ marks: [Int: Mark]) -> SimScene {
             var nodes: [GraphScene.Node] = []
@@ -501,7 +591,7 @@ public enum Simulations {
         }
 
         var frames: [SimFrame] = []
-        for value in [5, 3, 8, 1, 6, 2] {
+        for value in heapOrders[pick] {
             heap.append(value)
             var i = heap.count - 1
             let where_ = i == 0 ? "It becomes the top." : "It goes in the next free spot."
@@ -511,6 +601,7 @@ public enum Simulations {
                 if heap[i] < heap[p] {
                     frames.append(SimFrame(String(heap[i]) + " is smaller than its parent " + String(heap[p]) + ", so they swap.", scene([i: .focus, p: .compare])))
                     heap.swapAt(i, p)
+                    swaps += 1
                     i = p
                 } else {
                     frames.append(SimFrame(String(heap[i]) + " is not smaller than its parent " + String(heap[p]) + ", so it stays.", scene([i: .done, p: .compare])))
@@ -521,20 +612,24 @@ public enum Simulations {
                 frames.append(SimFrame(String(heap[0]) + " reached the top: it's the new smallest.", scene([0: .done])))
             }
         }
-        frames.append(SimFrame("The smallest value, " + String(heap[0]) + ", is always on top, ready to be taken first. Each insert climbed at most a few levels.", scene([0: .done])))
+        var outro = "The smallest value, " + String(heap[0]) + ", is always on top, ready to be taken first. " + String(swaps) + plural(swaps, " swap", " swaps") + " in total: each insert climbs at most a few levels."
+        if swaps == 0 {
+            outro = "No swaps at all: each new value was already bigger than its parent. The smallest, " + String(heap[0]) + ", sits on top."
+        }
+        frames.append(SimFrame(outro, scene([0: .done])))
         return Simulation(id: "heapInsert", title: "Min-heap inserts", blurb: "New values bubble up until their parent is smaller.", frames: frames)
     }
 
     // MARK: Shortest paths
 
-    static func dijkstra() -> Simulation {
+    static func dijkstra(roadSA: Int = 4) -> Simulation {
         let order = ["S", "A", "B", "C", "D", "T"]
         let positions: [String: Point2] = [
             "S": Point2(0.08, 0.5), "A": Point2(0.36, 0.16), "B": Point2(0.36, 0.84),
             "C": Point2(0.66, 0.16), "D": Point2(0.66, 0.84), "T": Point2(0.92, 0.5),
         ]
         let roads: [(String, String, Int)] = [
-            ("S", "A", 4), ("S", "B", 1), ("A", "B", 2), ("A", "C", 5),
+            ("S", "A", roadSA), ("S", "B", 1), ("A", "B", 2), ("A", "C", 5),
             ("B", "D", 8), ("C", "D", 1), ("C", "T", 3), ("D", "T", 6),
         ]
         var dist: [String: Int] = ["S": 0]
@@ -600,18 +695,24 @@ public enum Simulations {
             stops.append(up)
         }
         let routeText = stops.reversed().joined(separator: " → ")
-        frames.append(SimFrame("Cheapest route: " + routeText + ", total " + label("T") + ". The direct road S–A costs 4 but isn't on it: going via B is cheaper.", scene(focus: nil, route: route)))
+        let cost = String(roadSA)
+        var note = " The direct road S–A costs " + cost + " but isn't on it: going via B is cheaper."
+        if route.contains(DemoGraph.key("S", "A")) {
+            note = " At a cost of " + cost + ", the direct road S–A is now worth taking."
+        }
+        frames.append(SimFrame("Cheapest route: " + routeText + ", total " + label("T") + "." + note, scene(focus: nil, route: route)))
         return Simulation(id: "dijkstra", title: "Dijkstra's algorithm", blurb: "Always finish the closest place next.", frames: frames)
     }
 
     // MARK: Dynamic programming and recursion
 
-    static func fibTable() -> Simulation {
+    static func fibTable(n: Int = 10) -> Simulation {
+        let n = max(2, n)
         var f = [0, 1]
 
         func scene(fresh: Set<Int>, compare: Set<Int>) -> SimScene {
             var cells: [SimCell] = []
-            for i in 0...10 {
+            for i in 0...n {
                 let text = i < f.count ? String(f[i]) : ""
                 var mark: Mark = i < f.count ? .done : .idle
                 if compare.contains(i) { mark = .compare }
@@ -622,16 +723,20 @@ public enum Simulations {
         }
 
         var frames = [SimFrame("Base cases: f(0) = 0 and f(1) = 1. Every later value is the sum of the two before it.", scene(fresh: [0, 1], compare: []))]
-        for i in 2...10 {
+        for i in 2...n {
             f.append(f[i - 1] + f[i - 2])
             let caption = "f(" + String(i) + ") = f(" + String(i - 1) + ") + f(" + String(i - 2) + ") = " + String(f[i - 1]) + " + " + String(f[i - 2]) + " = " + String(f[i]) + ". Both were already in the table."
             frames.append(SimFrame(caption, scene(fresh: [i], compare: [i - 1, i - 2])))
         }
-        frames.append(SimFrame("f(10) = 55 after just 9 additions. Plain recursion, which forgets its answers, would make 177 calls.", scene(fresh: [], compare: [])))
+        // Plain recursion makes 2·f(n+1) − 1 calls to compute f(n).
+        let calls = 2 * (f[n] + f[n - 1]) - 1
+        let outro = "f(" + String(n) + ") = " + String(f[n]) + " after just " + String(n - 1) + " additions. Plain recursion, which forgets its answers, would make " + String(calls) + " calls."
+        frames.append(SimFrame(outro, scene(fresh: [], compare: [])))
         return Simulation(id: "fibTable", title: "Filling the table", blurb: "Fibonacci with every answer stored once.", frames: frames)
     }
 
-    static func factorialStack() -> Simulation {
+    static func factorialStack(n top: Int = 4) -> Simulation {
+        let top = max(2, top)
         var stack: [SimCell] = []
 
         func scene(out: String?) -> SimScene {
@@ -640,19 +745,18 @@ public enum Simulations {
         }
 
         var frames: [SimFrame] = []
-        for n in stride(from: 4, through: 1, by: -1) {
+        for n in stride(from: top, through: 1, by: -1) {
             for i in stack.indices { stack[i].mark = .idle }
             if n == 1 {
                 stack.append(SimCell("factorial(1)", .fresh, note: "base case: 1"))
                 frames.append(SimFrame("factorial(1) is the base case: it returns 1 straight away, no further calls.", scene(out: nil)))
             } else {
                 stack.append(SimCell("factorial(" + String(n) + ")", .fresh, note: String(n) + " × factorial(" + String(n - 1) + ")"))
-                let lead = n == 4 ? "Call factorial(4). " : "Call factorial(" + String(n) + "). "
-                frames.append(SimFrame(lead + "It needs factorial(" + String(n - 1) + ") first, so it waits on the stack.", scene(out: nil)))
+                frames.append(SimFrame("Call factorial(" + String(n) + "). It needs factorial(" + String(n - 1) + ") first, so it waits on the stack.", scene(out: nil)))
             }
         }
         var result = 1
-        for n in 2...4 {
+        for n in 2...top {
             stack.removeLast()
             let previous = result
             result *= n
@@ -661,8 +765,9 @@ public enum Simulations {
             frames.append(SimFrame("factorial(" + String(n - 1) + ") returns " + String(previous) + " and its frame is popped. factorial(" + String(n) + ") resumes: " + String(n) + " × " + String(previous) + " = " + String(result) + ".", scene(out: "Returned " + String(previous))))
         }
         stack.removeLast()
-        frames.append(SimFrame("factorial(4) returns 24 and the stack is empty again. Each call waited in its own frame until the one above it finished.", scene(out: "Result: 24")))
-        return Simulation(id: "factorialStack", title: "factorial(4) on the call stack", blurb: "Calls pile up, then unwind with answers.", frames: frames)
+        let name = "factorial(" + String(top) + ")"
+        frames.append(SimFrame(name + " returns " + String(result) + " and the stack is empty again. Each call waited in its own frame until the one above it finished.", scene(out: "Result: " + String(result))))
+        return Simulation(id: "factorialStack", title: name + " on the call stack", blurb: "Calls pile up, then unwind with answers.", frames: frames)
     }
 
     // MARK: Calculus and growth
@@ -671,47 +776,79 @@ public enum Simulations {
         stride(from: range.lowerBound, through: range.upperBound + step / 2, by: step).map { Point2($0, f($0)) }
     }
 
-    static func descent(id: String, title: String, rate: Double, steps: Int, blurb: String, outro: String) -> Simulation {
+    static func descent(id: String, title: String, rate: Double, start: Double = -3, steps: Int, blurb: String, outro: String?) -> Simulation {
         let f: (Double) -> Double = { x in 0.5 * (x - 1) * (x - 1) + 0.5 }
         let slope: (Double) -> Double = { x in x - 1 }
-        let curve = CurveScene.Curve(label: "error", points: samples(-4...6, step: 0.1, f))
-        var x = -3.0
+        let xRange = -4.0...6.0
+        let curve = CurveScene.Curve(label: "error", points: samples(xRange, step: 0.1, f))
+        var x = start
         var trail: [Point2] = []
+        var escaped = false
 
         func scene() -> SimScene {
-            .curve(CurveScene(curves: [curve], xRange: -4...6, yRange: 0...13, point: Point2(x, f(x)), trail: trail, tangentSlope: slope(x)))
+            .curve(CurveScene(curves: [curve], xRange: xRange, yRange: 0...13, point: Point2(x, f(x)), trail: trail, tangentSlope: slope(x)))
         }
 
-        var frames = [SimFrame("Start at x = −3. The goal is the lowest point of the curve. The line shows the slope where you stand. Learning rate: " + fmt(rate) + ".", scene())]
+        var frames = [SimFrame("Start at x = " + short(start) + ". The goal is the lowest point of the curve. The line shows the slope where you stand. Learning rate: " + fmt(rate) + ".", scene())]
         for k in 1...steps {
             let s = slope(x)
             let next = x - rate * s
+            if !xRange.contains(next) {
+                frames.append(SimFrame("Step " + String(k) + " would jump to x = " + short(next) + ", off the chart. Each jump lands further out than the last.", scene()))
+                escaped = true
+                break
+            }
             trail.append(Point2(x, f(x)))
             let caption = "Step " + String(k) + ": slope at x = " + fmt(x) + " is " + fmt(s) + ". Move to x − " + fmt(rate) + " × " + fmt(s) + " = " + fmt(next) + "."
             x = next
             frames.append(SimFrame(caption, scene()))
         }
-        frames.append(SimFrame(outro, scene()))
+        frames.append(SimFrame(outro ?? descentOutro(rate: rate, start: start, end: x, escaped: escaped), scene()))
         return Simulation(id: id, title: title, blurb: blurb, frames: frames)
     }
 
-    static func secantTangent() -> Simulation {
+    /// Explains what a learner-chosen learning rate did on the bowl-shaped curve.
+    static func descentOutro(rate: Double, start: Double, end: Double, escaped: Bool) -> String {
+        if abs(start - 1) < 1e-9 {
+            return "You started at the bottom. The slope there is 0, so gradient descent never moves."
+        }
+        if escaped || rate > 2 + 1e-9 {
+            return "A learning rate above 2 on this curve overshoots so far that every step lands further out. Training like this blows up instead of settling."
+        }
+        if abs(rate - 2) < 1e-9 {
+            return "At exactly 2, each step lands the same distance past the bottom on the other side. It bounces back and forth forever."
+        }
+        if abs(rate - 1) < 1e-9 {
+            return "A rate of exactly 1 jumps straight to the bottom in one step here. Real error curves are never this tidy."
+        }
+        let near = abs(end - 1) < 0.05
+        if rate > 1 {
+            return "Each step jumps past the bottom and zig-zags, but the jumps shrink. " + (near ? "It still settles near x = 1." : "It's at x = " + fmt(end) + ", slowly closing in on 1.")
+        }
+        if near {
+            return "Every step went downhill without passing the bottom, and the steps shrank as the slope flattened. It reached x = " + fmt(end) + ", the minimum."
+        }
+        return "Small steps are safe but slow: after 10 of them it's only at x = " + fmt(end) + ", still short of the minimum at 1."
+    }
+
+    static func secantTangent(at a: Double = 2) -> Simulation {
         let f: (Double) -> Double = { x in 0.25 * x * x }
         let curve = CurveScene.Curve(label: "x²/4", points: samples(-1...5, step: 0.1, f))
-        let anchor = Point2(2, f(2))
+        let anchor = Point2(a, f(a))
+        let where_ = short(a)
         var frames: [SimFrame] = []
         for (i, h) in [2.0, 1.0, 0.5, 0.1].enumerated() {
-            let other = Point2(2 + h, f(2 + h))
+            let other = Point2(a + h, f(a + h))
             let slope = (other.y - anchor.y) / h
-            var caption = "Gap h = " + fmt(h) + ": the slope between the two points is (f(2 + h) − f(2)) / h = " + fmt(slope, 3) + "."
+            var caption = "Gap h = " + fmt(h) + ": the slope between the two points is (f(" + where_ + " + h) − f(" + where_ + ")) / h = " + fmt(slope, 3) + "."
             if i == 0 {
                 caption = "A curve's steepness keeps changing, so measure it between two points. " + caption
             }
             frames.append(SimFrame(caption, .curve(CurveScene(curves: [curve], xRange: -1...5, yRange: -0.5...6.5, point: anchor, secondPoint: other))))
         }
         frames.append(SimFrame(
-            "Shrink the gap to nothing and the slope settles at exactly 1. That limit is the derivative of x²/4 at x = 2: the tangent line.",
-            .curve(CurveScene(curves: [curve], xRange: -1...5, yRange: -0.5...6.5, point: anchor, tangentSlope: 1))
+            "Shrink the gap to nothing and the slope settles at exactly " + short(a / 2) + ". That limit is the derivative of x²/4 at x = " + where_ + ": the tangent line.",
+            .curve(CurveScene(curves: [curve], xRange: -1...5, yRange: -0.5...6.5, point: anchor, tangentSlope: a / 2))
         ))
         return Simulation(id: "secantTangent", title: "From secant to tangent", blurb: "Watch a slope between two points become a slope at one point.", frames: frames)
     }

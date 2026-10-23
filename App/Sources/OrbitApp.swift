@@ -10,6 +10,7 @@ struct OrbitApp: App {
             RootView()
                 .environment(model)
                 .tint(Theme.accent)
+                .dynamicTypeSize(...DynamicTypeSize.accessibility2)
         }
     }
 }

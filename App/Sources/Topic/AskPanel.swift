@@ -38,7 +38,7 @@ struct AskPanel: View {
                         .onSubmit(runQuestion)
                     Button(action: runQuestion) {
                         Image(systemName: "arrow.up")
-                            .font(.system(size: 17, weight: .bold))
+                            .font(.system(.body, weight: .bold))
                             .foregroundStyle(Theme.paper)
                             .frame(width: 44, height: 44)
                             .background(Theme.accent, in: RoundedRectangle(cornerRadius: 11, style: .continuous))
@@ -76,7 +76,7 @@ struct AskPanel: View {
         VStack(alignment: .leading, spacing: 10) {
             if let asked {
                 Text(asked)
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.system(.subheadline, weight: .semibold))
                     .foregroundStyle(Theme.inkSoft)
             }
             Text(text)

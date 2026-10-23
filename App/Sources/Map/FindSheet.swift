@@ -63,10 +63,10 @@ struct FindSheet: View {
                     .padding(.top, 5)
                 VStack(alignment: .leading, spacing: 3) {
                     Text(topic.title)
-                        .font(.system(size: 17, weight: .semibold))
+                        .font(.system(.body, weight: .semibold))
                         .foregroundStyle(Theme.ink)
                     Text(topic.summary)
-                        .font(.system(size: 14))
+                        .font(.system(.subheadline))
                         .foregroundStyle(Theme.inkSoft)
                         .lineLimit(2)
                 }

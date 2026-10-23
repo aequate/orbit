@@ -211,7 +211,12 @@ struct MapScreen: View {
                 selected = nil
             }
         } else {
-            HintCard(layout: model.settings.mapLayout)
+            VStack(spacing: 10) {
+                if let next = model.nextUp {
+                    NextUpCard(next: next)
+                }
+                HintCard(layout: model.settings.mapLayout, brief: model.nextUp?.kind == .resume)
+            }
         }
     }
 }
@@ -224,7 +229,7 @@ private struct MapControlButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: symbol)
-                .font(.system(size: 17, weight: .semibold))
+                .font(.system(.body, weight: .semibold))
                 .foregroundStyle(Theme.ink)
                 .frame(width: 44, height: 44)
                 .background(Theme.surface, in: RoundedRectangle(cornerRadius: 11, style: .continuous))
@@ -286,15 +291,22 @@ private struct SelectionCard: View {
 /// Shown when nothing is selected: how to use the map, and what the marks mean.
 private struct HintCard: View {
     let layout: MapLayout
+    /// Once someone has started, skip the explanation and keep only the legend.
+    var brief = false
+
+    private var explanation: String {
+        if layout == .tower { return "Foundations sit at the bottom. Each ring up needs the rings below it." }
+        return "Ideas that belong together sit together. Lines join an idea to what it builds on."
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(layout == .tower
-                 ? "Foundations sit at the bottom. Each ring up needs the rings below it."
-                 : "Ideas that belong together sit together. Lines join an idea to what it builds on.")
-                .font(Theme.body)
-                .foregroundStyle(Theme.ink)
-                .fixedSize(horizontal: false, vertical: true)
+            if !brief {
+                Text(explanation)
+                    .font(Theme.body)
+                    .foregroundStyle(Theme.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             Text("Drag to turn · pinch to zoom · tap an idea")
                 .font(Theme.caption)
                 .foregroundStyle(Theme.inkSoft)

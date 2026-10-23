@@ -95,3 +95,36 @@ extension Atlas {
         return 0
     }
 }
+
+extension Atlas {
+    // MARK: What to learn next
+
+    /// Ideas within reach: not understood yet, and everything they build on is.
+    /// Foundations come first, then the ideas that unlock the most.
+    public func ready(understood: Set<String>, limit: Int = 6) -> [Topic] {
+        let open = topics.filter { topic in
+            !understood.contains(topic.id) && topic.requires.allSatisfy { understood.contains($0) }
+        }
+        let ranked = open.sorted { lhs, rhs in
+            let ld = depth(of: lhs.id)
+            let rd = depth(of: rhs.id)
+            if ld != rd { return ld < rd }
+            let lu = dependents(of: lhs.id).count
+            let ru = dependents(of: rhs.id).count
+            if lu != ru { return lu > ru }
+            let lc = clusterPosition(lhs.cluster)
+            let rc = clusterPosition(rhs.cluster)
+            if lc != rc { return lc < rc }
+            return lhs.title < rhs.title
+        }
+        return Array(ranked.prefix(limit))
+    }
+
+    /// The idea opened most recently that isn't understood yet: the one to pick up again.
+    public func unfinished(understood: Set<String>, visited: [String: Date]) -> Topic? {
+        let recent = visited
+            .filter { !understood.contains($0.key) && topic($0.key) != nil }
+            .max { lhs, rhs in lhs.value < rhs.value }
+        return recent.flatMap { topic($0.key) }
+    }
+}

@@ -39,7 +39,7 @@ struct CompareScreen: View {
                     ForEach(comparison.rows, id: \.aspect) { row in
                         VStack(alignment: .leading, spacing: 8) {
                             Text(row.aspect)
-                                .font(.system(size: 15, weight: .semibold))
+                                .font(.system(.subheadline, weight: .semibold))
                                 .foregroundStyle(Theme.inkSoft)
                             HStack(alignment: .top, spacing: 10) {
                                 cell(row.left, hue: hue(comparison.left))
@@ -89,13 +89,13 @@ struct CompareScreen: View {
     private func sideLabel(_ name: String, colour: Color, linked: Bool) -> some View {
         HStack(spacing: 6) {
             Text(name)
-                .font(.system(size: 17, weight: .bold))
+                .font(.system(.body, weight: .bold))
                 .foregroundStyle(Theme.paper)
                 .lineLimit(2)
                 .minimumScaleFactor(0.8)
             if linked {
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .bold))
+                    .font(.system(.caption, weight: .bold))
                     .foregroundStyle(Theme.paper.opacity(0.8))
             }
         }
@@ -106,7 +106,7 @@ struct CompareScreen: View {
 
     private func cell(_ text: String, hue: Color) -> some View {
         Text(text)
-            .font(.system(size: 16))
+            .font(.system(.callout))
             .foregroundStyle(Theme.ink)
             .fixedSize(horizontal: false, vertical: true)
             .padding(12)

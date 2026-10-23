@@ -13,11 +13,12 @@ struct YouScreen: View {
                     .font(Theme.title(32))
                     .foregroundStyle(Theme.ink)
                 stats
+                ReadySection()
                 clusters
                 settings
                 about
                 Button("Reset progress", role: .destructive) { confirmReset = true }
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(.callout, weight: .semibold))
                     .foregroundStyle(Theme.bad)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
@@ -63,7 +64,7 @@ struct YouScreen: View {
                             ClusterTag(cluster: cluster)
                             Spacer()
                             Text(String(done) + " / " + String(topics.count))
-                                .font(.system(size: 13, weight: .semibold).monospacedDigit())
+                                .font(.system(.footnote, weight: .semibold).monospacedDigit())
                                 .foregroundStyle(Theme.inkSoft)
                         }
                         ProgressLine(fraction: topics.isEmpty ? 0 : Double(done) / Double(topics.count), tint: Theme.hue(cluster.hue))
@@ -99,7 +100,7 @@ struct YouScreen: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Toggle(isOn: aphantasia) {
                         Text("Aphantasia mode")
-                            .font(.system(size: 17, weight: .semibold))
+                            .font(.system(.body, weight: .semibold))
                             .foregroundStyle(Theme.ink)
                     }
                     .tint(Theme.accent)
@@ -126,7 +127,7 @@ struct YouScreen: View {
     private func setting<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
-                .font(.system(size: 15, weight: .semibold))
+                .font(.system(.subheadline, weight: .semibold))
                 .foregroundStyle(Theme.inkSoft)
             content()
         }

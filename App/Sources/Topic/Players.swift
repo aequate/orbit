@@ -87,12 +87,22 @@ struct DiagramPlayer: View {
 
 /// Plays a simulation like a short video you can scrub, pause and step through.
 struct SimPlayer: View {
-    let simulation: Simulation
+    let base: Simulation
     let hue: Color
     let secondsPerFrame: Double
     @State private var frame = 0
     @State private var playing = false
+    @State private var values: SimValues = [:]
+    @State private var custom: Simulation?
 
+    init(simulation: Simulation, hue: Color, secondsPerFrame: Double) {
+        self.base = simulation
+        self.hue = hue
+        self.secondsPerFrame = secondsPerFrame
+    }
+
+    private var simulation: Simulation { custom ?? base }
+    private var controls: [SimControl] { Simulations.controls(for: base.id) }
     private var last: Int { max(0, simulation.frames.count - 1) }
 
     var body: some View {
@@ -110,6 +120,25 @@ struct SimPlayer: View {
             }
             scrubber
             controls
+            if !controls.isEmpty {
+                TryItPanel(controls: controls, values: values, hue: hue, onChange: apply, onReset: reset)
+                    .id("tryit")
+            }
+        }
+        .onAppear {
+            #if DEBUG
+            let defaults = UserDefaults.standard
+            if let tried = defaults.string(forKey: "orbitTry") {
+                for pair in tried.split(separator: ",") {
+                    let bits = pair.split(separator: "=").map(String.init)
+                    if bits.count == 2, let number = Double(bits[1]) { values[bits[0]] = number }
+                }
+                custom = Simulations.make(base.id, values: values)
+            }
+            if defaults.object(forKey: "orbitFrame") != nil {
+                frame = min(last, max(0, defaults.integer(forKey: "orbitFrame")))
+            }
+            #endif
         }
         .task(id: playing) {
             guard playing else { return }
@@ -127,6 +156,20 @@ struct SimPlayer: View {
         .onDisappear { playing = false }
     }
 
+    private func apply(_ id: String, _ value: Double) {
+        values[id] = value
+        custom = Simulations.make(base.id, values: values)
+        playing = false
+        frame = 0
+    }
+
+    private func reset() {
+        values = [:]
+        custom = nil
+        playing = false
+        frame = 0
+    }
+
     private var frameBinding: Binding<Double> {
         Binding(
             get: { Double(frame) },
@@ -140,7 +183,7 @@ struct SimPlayer: View {
     private var scrubber: some View {
         HStack(spacing: 12) {
             Text(String(frame + 1) + " / " + String(simulation.frames.count))
-                .font(.system(size: 14, weight: .semibold).monospacedDigit())
+                .font(.system(.subheadline, weight: .semibold).monospacedDigit())
                 .foregroundStyle(Theme.inkSoft)
                 .frame(minWidth: 54, alignment: .leading)
             if last > 0 {
@@ -191,5 +234,89 @@ struct SimPlayer: View {
             .frame(width: 72)
             .accessibilityLabel("Next frame")
         }
+    }
+}
+
+/// The "Try it" controls under a simulation. Changing anything re-runs the algorithm from the start.
+private struct TryItPanel: View {
+    let controls: [SimControl]
+    let values: SimValues
+    let hue: Color
+    let onChange: (String, Double) -> Void
+    let onReset: () -> Void
+
+    private func value(_ control: SimControl) -> Double {
+        values[control.id] ?? control.initial
+    }
+
+    private var changed: Bool {
+        controls.contains { control in value(control) != control.initial }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Label("Try it", systemImage: "slider.horizontal.3")
+                    .font(.system(.subheadline, weight: .bold))
+                    .foregroundStyle(Theme.ink)
+                Spacer()
+                if changed {
+                    Button("Reset", action: onReset)
+                        .font(.system(.subheadline, weight: .semibold))
+                        .foregroundStyle(hue)
+                }
+            }
+            ForEach(controls) { control in
+                row(control)
+            }
+            Text("Change a value and the run starts again with it.")
+                .font(Theme.caption)
+                .foregroundStyle(Theme.inkSoft)
+        }
+        .surface(Theme.sunken)
+    }
+
+    @ViewBuilder
+    private func row(_ control: SimControl) -> some View {
+        switch control.kind {
+        case .slider(let range, let step, _):
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text(control.label)
+                        .font(.system(.subheadline, weight: .semibold))
+                        .foregroundStyle(Theme.inkSoft)
+                    Spacer()
+                    Text(control.display(value(control)))
+                        .font(.system(.body, weight: .bold).monospacedDigit())
+                        .foregroundStyle(Theme.ink)
+                }
+                Slider(value: binding(control), in: range, step: step)
+                    .tint(hue)
+                    .accessibilityLabel(control.label)
+                    .accessibilityValue(control.display(value(control)))
+            }
+        case .choice(let options):
+            VStack(alignment: .leading, spacing: 8) {
+                Text(control.label)
+                    .font(.system(.subheadline, weight: .semibold))
+                    .foregroundStyle(Theme.inkSoft)
+                FlowLayout(spacing: 8) {
+                    ForEach(options) { option in
+                        Button(option.label) { onChange(control.id, option.value) }
+                            .buttonStyle(ChipButtonStyle(selected: option.value == value(control), tint: hue))
+                    }
+                }
+            }
+        }
+    }
+
+    private func binding(_ control: SimControl) -> Binding<Double> {
+        Binding(
+            get: { value(control) },
+            set: { newValue in
+                let snapped = control.clamp(newValue)
+                if snapped != value(control) { onChange(control.id, snapped) }
+            }
+        )
     }
 }

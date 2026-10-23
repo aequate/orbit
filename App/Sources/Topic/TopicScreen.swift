@@ -32,7 +32,23 @@ struct TopicScreen: View {
 
     private func content(_ topic: Topic) -> some View {
         let hue = model.atlas.hue(of: topic.id)
-        return ScrollView {
+        return ScrollViewReader { proxy in
+            scroller(topic, hue: hue)
+                .onAppear {
+                    #if DEBUG
+                    if let target = UserDefaults.standard.string(forKey: "orbitScroll") {
+                        Task { @MainActor in
+                            try? await Task.sleep(for: .milliseconds(600))
+                            proxy.scrollTo(target, anchor: .top)
+                        }
+                    }
+                    #endif
+                }
+        }
+    }
+
+    private func scroller(_ topic: Topic, hue: Color) -> some View {
+        ScrollView {
             VStack(alignment: .leading, spacing: 28) {
                 TopicHeader(topic: topic)
                 modeSection(topic, hue: hue)
@@ -94,6 +110,12 @@ struct TopicScreen: View {
 
     private func currentMode(_ topic: Topic) -> TopicMode {
         if let mode, modes(for: topic).contains(mode) { return mode }
+        #if DEBUG
+        if let forced = UserDefaults.standard.string(forKey: "orbitMode"),
+           let chosen = TopicMode(rawValue: forced), modes(for: topic).contains(chosen) {
+            return chosen
+        }
+        #endif
         return model.settings.aphantasiaMode ? .build : .read
     }
 
@@ -294,7 +316,7 @@ struct TopicRow: View {
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 8) {
                         Text(topic.title)
-                            .font(.system(size: 17, weight: .semibold))
+                            .font(.system(.body, weight: .semibold))
                             .foregroundStyle(Theme.ink)
                         if let tag {
                             Text(tag)
@@ -303,14 +325,14 @@ struct TopicRow: View {
                         }
                     }
                     Text(topic.summary)
-                        .font(.system(size: 15))
+                        .font(.system(.subheadline))
                         .foregroundStyle(Theme.inkSoft)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
                 }
                 Spacer(minLength: 0)
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(.footnote, weight: .semibold))
                     .foregroundStyle(Theme.inkSoft)
                     .padding(.top, 4)
             }
@@ -373,7 +395,7 @@ private struct LeadsSection: View {
         HStack(spacing: 12) {
             Circle().fill(Theme.ink).frame(width: 10, height: 10).frame(width: 26)
             Text(topic.title + " (here)")
-                .font(.system(size: 15, weight: .semibold))
+                .font(.system(.subheadline, weight: .semibold))
                 .foregroundStyle(Theme.inkSoft)
         }
         .padding(.horizontal, 14)
@@ -410,11 +432,11 @@ private struct CompareSection: View {
                             Image(systemName: "rectangle.split.2x1")
                                 .foregroundStyle(model.atlas.hue(of: topic.id))
                             Text(comparison.title)
-                                .font(.system(size: 17, weight: .semibold))
+                                .font(.system(.body, weight: .semibold))
                                 .foregroundStyle(Theme.ink)
                             Spacer()
                             Image(systemName: "chevron.right")
-                                .font(.system(size: 13, weight: .semibold))
+                                .font(.system(.footnote, weight: .semibold))
                                 .foregroundStyle(Theme.inkSoft)
                         }
                         .surface()
@@ -466,12 +488,40 @@ private struct UnderstoodBar: View {
     @Environment(AppModel.self) private var model
     let topic: Topic
 
+    /// After "I get it": an idea this one just opened up, or else anything within reach.
+    private var nextTopic: Topic? {
+        let opened = model.atlas.dependents(of: topic.id).filter { candidate in
+            !model.isUnderstood(candidate.id) && candidate.requires.allSatisfy { model.isUnderstood($0) }
+        }
+        return opened.first ?? model.readyTopics(limit: 1).first
+    }
+
     var body: some View {
         let understood = model.isUnderstood(topic.id)
         VStack(spacing: 0) {
             Rectangle().fill(Theme.line).frame(height: 1)
             Group {
-                if understood {
+                if understood, let next = nextTopic {
+                    HStack(spacing: 10) {
+                        Button {
+                            model.toggleUnderstood(topic.id)
+                        } label: {
+                            Label("Got it", systemImage: "checkmark")
+                        }
+                        .buttonStyle(SecondaryButtonStyle())
+                        .accessibilityLabel("Understood")
+                        .accessibilityHint("Tap to undo")
+                        .frame(maxWidth: 140)
+                        Button {
+                            model.open(.topic(next.id))
+                        } label: {
+                            Text(Words.join(["Next: ", next.title]))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
+                        }
+                        .buttonStyle(PrimaryButtonStyle(fill: model.atlas.hue(of: next.id)))
+                    }
+                } else if understood {
                     Button {
                         model.toggleUnderstood(topic.id)
                     } label: {

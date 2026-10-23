@@ -47,14 +47,24 @@ enum Theme {
         }
     }
 
+    /// Serif titles. The size picks the nearest text style, so titles follow the
+    /// iPhone's text-size setting like everything else.
     static func title(_ size: CGFloat) -> Font {
-        .system(size: size, weight: .semibold, design: .serif)
+        .system(titleStyle(size), design: .serif, weight: .semibold)
     }
 
-    static let body = Font.system(size: 17)
-    static let reading = Font.system(size: 19)
-    static let caption = Font.system(size: 13, weight: .medium)
-    static let label = Font.system(size: 12, weight: .semibold)
+    private static func titleStyle(_ size: CGFloat) -> Font.TextStyle {
+        if size >= 30 { return .largeTitle }
+        if size >= 24 { return .title }
+        if size >= 20 { return .title2 }
+        if size >= 18 { return .title3 }
+        return .callout
+    }
+
+    static let body = Font.system(.body)
+    static let reading = Font.system(.title3)
+    static let caption = Font.system(.footnote, weight: .medium)
+    static let label = Font.system(.caption, weight: .semibold)
 }
 
 /// Joins text pieces. Long `+` chains of strings can time out Swift's type checker.
@@ -128,7 +138,7 @@ struct PrimaryButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 17, weight: .semibold))
+            .font(.system(.body, weight: .semibold))
             .foregroundStyle(Theme.paper)
             .frame(maxWidth: .infinity, minHeight: 52)
             .background(fill, in: RoundedRectangle(cornerRadius: Theme.radius, style: .continuous))
@@ -139,7 +149,7 @@ struct PrimaryButtonStyle: ButtonStyle {
 struct SecondaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 16, weight: .semibold))
+            .font(.system(.callout, weight: .semibold))
             .foregroundStyle(Theme.ink)
             .frame(maxWidth: .infinity, minHeight: 48)
             .background(Theme.sunken, in: RoundedRectangle(cornerRadius: Theme.radius, style: .continuous))
@@ -154,7 +164,7 @@ struct ChipButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 14, weight: .semibold))
+            .font(.system(.subheadline, weight: .semibold))
             .foregroundStyle(selected ? Theme.paper : Theme.ink)
             .padding(.horizontal, 12)
             .frame(minHeight: 34)
@@ -178,7 +188,7 @@ struct Segmented<Value: Hashable>: View {
                     selection = option
                 } label: {
                     Text(title(option))
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(.system(.subheadline, weight: .semibold))
                         .foregroundStyle(isOn ? Theme.ink : Theme.inkSoft)
                         .frame(maxWidth: .infinity, minHeight: 36)
                         .background(isOn ? Theme.surface : Color.clear, in: RoundedRectangle(cornerRadius: 10, style: .continuous))

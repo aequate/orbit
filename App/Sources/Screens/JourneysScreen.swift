@@ -57,7 +57,7 @@ private struct JourneyCard: View {
                         .foregroundStyle(Theme.inkSoft)
                     Spacer()
                     Text(JourneyText.action(progress))
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(.system(.subheadline, weight: .semibold))
                         .foregroundStyle(hue)
                 }
             }
@@ -195,7 +195,7 @@ private struct JourneyStepRow: View {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 8) {
                         Text(topic.title)
-                            .font(.system(size: 18, weight: .semibold))
+                            .font(.system(.title3, weight: .semibold))
                             .foregroundStyle(Theme.ink)
                         if isNext {
                             Text("NEXT")
@@ -207,7 +207,7 @@ private struct JourneyStepRow: View {
                         }
                     }
                     Text(topic.summary)
-                        .font(.system(size: 15))
+                        .font(.system(.subheadline))
                         .foregroundStyle(Theme.inkSoft)
                         .multilineTextAlignment(.leading)
                         .fixedSize(horizontal: false, vertical: true)

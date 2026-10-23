@@ -47,16 +47,16 @@ struct OnboardingSheet: View {
             HStack {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(title)
-                        .font(.system(size: 18, weight: .semibold))
+                        .font(.system(.title3, weight: .semibold))
                         .foregroundStyle(Theme.ink)
                     Text(detail)
-                        .font(.system(size: 15))
+                        .font(.system(.subheadline))
                         .foregroundStyle(Theme.inkSoft)
                         .multilineTextAlignment(.leading)
                 }
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(.subheadline, weight: .semibold))
                     .foregroundStyle(Theme.inkSoft)
             }
             .surface()
