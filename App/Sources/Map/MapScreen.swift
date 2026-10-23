@@ -5,6 +5,7 @@ import OrbitKit
 struct MapScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var cover: CGFloat = 0
     @State private var rig = OrbitRig()
     @State private var selected: String?
     @State private var filter: String?
@@ -46,6 +47,13 @@ struct MapScreen: View {
                         controls
                     }
                     bottomCard
+                        .background(
+                            GeometryReader { card in
+                                Color.clear
+                                    .onAppear { cover = card.size.height }
+                                    .onChange(of: card.size.height) { _, height in cover = height }
+                            }
+                        )
                 }
                 .padding(.horizontal, Theme.gutter)
                 .padding(.bottom, 12)
@@ -129,6 +137,11 @@ struct MapScreen: View {
 
     // MARK: Canvas
 
+    /// The part of the canvas not hidden behind the bottom card. The map centres itself there.
+    private func viewport(_ size: CGSize) -> CGSize {
+        CGSize(width: size.width, height: max(200, size.height - cover - 20))
+    }
+
     private var mapCanvas: some View {
         let scene = self.scene
         let style = self.style
@@ -136,13 +149,13 @@ struct MapScreen: View {
             TimelineView(.animation(minimumInterval: nil, paused: !rig.isMoving)) { timeline in
                 Canvas { context, size in
                     rig.step(to: timeline.date)
-                    MapRenderer.draw(context, size: size, scene: scene, camera: rig.camera, morph: rig.morph, style: style)
+                    MapRenderer.draw(context, size: viewport(size), scene: scene, camera: rig.camera, morph: rig.morph, style: style)
                 }
             }
             .contentShape(Rectangle())
             .gesture(
                 SpatialTapGesture().onEnded { value in
-                    tap(at: value.location, size: geo.size)
+                    tap(at: value.location, size: viewport(geo.size))
                 }
             )
             .simultaneousGesture(

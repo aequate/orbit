@@ -160,10 +160,15 @@ private struct StatTile: View {
             Text(String(value))
                 .font(Theme.title(28).monospacedDigit())
                 .foregroundStyle(Theme.ink)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
             Text(label)
                 .font(Theme.caption)
                 .foregroundStyle(Theme.inkSoft)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .surface(padding: 14)
         .accessibilityElement(children: .combine)
     }
